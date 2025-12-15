@@ -1,0 +1,11 @@
+.*
+!.gitignore
+.vscode/
+__pycache__/
+tmp/
+# coverage files
+.coverage
+htmlcov/
+coverage/
+# legacy files
+__LEGACY/
