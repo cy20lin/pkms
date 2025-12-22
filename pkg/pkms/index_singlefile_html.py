@@ -81,6 +81,8 @@ def parse_js_date_to_iso8601(date_str: str) -> str:
     return f"{yyyy}-{mm}-{dd}T{hhmmss}{zone}"
 
 def parse_singlefile_info_text(info_text):
+    if info_text is None:
+        return None
     records = info_text.split('\n')
     info = {}
     for i,r in enumerate(records):
@@ -136,7 +138,7 @@ def parse_singlefile_html_metadata(content, parse_info_text=True, normalize_save
         key = None
         value_start = None
         value_end = None
-        data = {}
+        data = {'url':None, 'saved_date':None, 'info':None}
         for match in matches:
             # logging.debug(f"Match, key='{match.group(1)}', start={match.start(1)}, end={match.end(1)}")
             key = match.group(1)
@@ -147,18 +149,18 @@ def parse_singlefile_html_metadata(content, parse_info_text=True, normalize_save
             # logging.debug(f"key={key}, value={repr(value)}")
             key = key.replace(' ', "_")
             data[key] = value
-        if parse_info_text:
-            data['info'] = parse_singlefile_info_text(data['info'])
         if normalize_saved_date:
             data['saved_date'] = parse_js_date_to_iso8601(data['saved_date'])
+        if parse_info_text:
+            data['info'] = parse_singlefile_info_text(data['info'])
         return data
     return None
     
 
-def get_file_name_id(file_path):
+def get_file_name_id_prefix(file_path):
     p = pathlib.Path(file_path)
-    name_id = p.name.split(' ')[0]
-    return name_id
+    name_id_prefix = p.name.split(' ')[0]
+    return name_id_prefix
 
 def extract_html_metadata(html: str) -> dict:
     """
@@ -376,46 +378,148 @@ def find_canonical_uri(links, base_uri=None, uri_name='uri'):
     link = find_canonical_link(links)
     return link[uri_name] if link else base_uri
 
+def is_importance_str(maybe_importance_str:str):
+    return all(c == '!' for c in maybe_importance_str)
+
+def try_get_importance(maybe_importance_str:str):
+    return len(maybe_importance_str) if is_importance_str(maybe_importance_str) else None
+
+def parse_file_name(file_name: str):
+    '''
+    Docstring for parse_file_name
+    
+    :param file_name: file name with following format
+        <file_id_prefix> [importance] [title] {context}<file_extension>
+    '''
+    p = pathlib.Path(file_name)
+    name = p.name
+    pattern = r"^([\S]*)\s+(!*)\s*(?:([^\{.]*))(?:{([^}]*)})?[^.]*(.*)$"
+    # file_id_prefix: ^([\S]*)
+    # space: \s+
+    # importance optional: (!*)
+    # space: \s*
+    # title: (?:([^\{.]*)\s*) , non '{' and '.' character, strip extra space
+    # context: (?:{([^}]*)}) , first curlybraces enclosed text
+    # rest text: [^.]* , ignored
+    # extension: (.*)$ , rest items
+    m = re.match(pattern,name)
+    file_id_prefix = m.group(1)
+    importance = m.group(2)
+    title = m.group(3)
+    context = m.group(4)
+    extension = m.group(5)
+    file_id = file_id_prefix + extension
+    result = {
+        "file_name": name,
+        "file_id_prefix": file_id_prefix,
+        "file_id": file_id,
+        "importance": len(importance),
+        "title": title,
+        "context": context,
+        "file_extension": extension,
+    }
+    return result
+
+    
+
 def index_singlefile_html_file(file_path):
     content = get_file_content(file_path)
     sf_metadata = parse_singlefile_html_metadata(content)
     if sf_metadata is None:
         raise RuntimeError("Cannot read singlefile html comment for metadata")
     logging.debug(f'sf_metadata: {sf_metadata}')
-    file_name_id = get_file_name_id(file_path)
+    file_path_ = pathlib.Path(file_path).absolute()
+    file_extension = file_path_.suffix
+    file_name_id = get_file_name_id_prefix(file_path) + file_extension
     text = inscriptis.get_text(content)
     # Don't collect all links include <a> now. 
     # Maybe put into html_metadata for record in future.
     # links = collect_links(content, sf_metadata["url"])
     # canonical_uri = find_canonical_uri(links, sf_metadata["url"])
     html_metadata = extract_html_metadata(content)
-    file_path_ = pathlib.Path(file_path).absolute()
     file_dir_path = file_path_.parent.as_posix()
+    file_name_parsed = parse_file_name(file_path_.name)
+    file_hash_sha256 = get_content_hash_sha256_string(content)
+    title = html_metadata.get('title',None)
+    if not title: title = file_name_parsed['title']
     index = {
         "index_created_datetime": datetime.datetime.now().astimezone().isoformat(),
         "index_updated_datetime": datetime.datetime.now().astimezone().isoformat(),
         "file_created_datetime": sf_metadata['saved_date'],
-        "file_updated_datetime": sf_metadata['saved_date'],
+        "file_modified_datetime": sf_metadata['saved_date'],
+        "file_name": file_name_parsed['file_name'],
         "file_id": file_name_id,
-        "file_hash_sha256": get_content_hash_sha256_string(content),
-        "file_extension": file_path_.suffix,
-        "file_stem": file_path_.stem,
+        "file_uid": file_hash_sha256,
+        "file_uri": file_path_.as_uri(),
+        "file_hash_sha256": file_hash_sha256,
+        "file_size": file_path_.stat().st_size,
+        "file_extension": file_name_parsed['file_extension'],
+        "importance": file_name_parsed['importance'],
         "file_dir_path": file_dir_path,
-        "title": html_metadata['title'],
+        "title": title,
         "origin_uri": sf_metadata["url"],
+        "text": text,
         "extra": {
             "html": html_metadata,
             "single_file": sf_metadata
         },
-        "text": text,
     }
     return index
+
+def index_html_file(file_path):
+    content = get_file_content(file_path)
+    sf_metadata = parse_singlefile_html_metadata(content)
+    is_singlefile_html = sf_metadata is not None
+    logging.debug(f'sf_metadata: {sf_metadata}')
+    file_path_ = pathlib.Path(file_path).absolute()
+    file_extension = file_path_.suffix
+    file_name_id = get_file_name_id_prefix(file_path) + file_extension
+    text = inscriptis.get_text(content)
+    # Don't collect all links include <a> now. 
+    # Maybe put into html_metadata for record in future.
+    # links = collect_links(content, sf_metadata["url"])
+    # canonical_uri = find_canonical_uri(links, sf_metadata["url"])
+    html_metadata = extract_html_metadata(content)
+    file_dir_path = file_path_.parent.as_posix()
+    file_name_parsed = parse_file_name(file_path_.name)
+    file_hash_sha256 = get_content_hash_sha256_string(content)
+    title = html_metadata.get('title',None)
+    if not title: title = file_name_parsed['title']
+    if isinstance(sf_metadata,dict) and 'saved_date' in sf_metadata:
+        saved_datetime = sf_metadata['saved_date']
+    else:
+        saved_datetime = datetime.datetime.fromtimestamp(file_path.stat().st_ctime).astimezone().isoformat()
+    now = datetime.datetime.now()
+    index = {
+        "index_created_datetime": now.astimezone().isoformat(),
+        "index_updated_datetime": now.astimezone().isoformat(),
+        "file_created_datetime": saved_datetime,
+        "file_modified_datetime": saved_datetime,
+        "file_name": file_name_parsed['file_name'],
+        "file_id": file_name_id,
+        "file_uid": file_hash_sha256,
+        "file_uri": file_path_.as_uri(),
+        "file_hash_sha256": file_hash_sha256,
+        "file_size": file_path_.stat().st_size,
+        "file_extension": file_name_parsed['file_extension'],
+        "importance": file_name_parsed['importance'],
+        "file_dir_path": file_dir_path,
+        "title": title,
+        "origin_uri": sf_metadata.get("url", None) if sf_metadata else None,
+        "text": text,
+        "extra": {
+            "html": html_metadata,
+            "single_file": sf_metadata
+        },
+    }
+    return index
+
 
 
 def main():
     args = parse_args()
     index = index_singlefile_html_file(file_path=args.file_path)
-    f = open("index.jsonc", 'w')
+    f = open("index.jsonc", 'w', newline='\n')
     json.dump(index, f, indent=2)
 
 
