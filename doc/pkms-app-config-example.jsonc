@@ -1,0 +1,57 @@
+{
+  // semver version
+  "version": "0.1.0",
+  // Optional name for user
+  "name":"",
+  // Optional description for user
+  "description": "",
+  // Global Indexer Mapping
+  // extension -> IndexerBuildingConfig
+  "indexer_mapping": {
+    ".html": {
+      "module":"pkms.indexer.HtmlIndexer"
+    }
+  },
+  "collections":[
+    {
+      // Collection Name for user
+      "name": "HTML Webpages",
+
+      // Collection Description for user
+      "description": null,
+
+      // Base path for the resource to be searched/globbed
+      "base_path":"C:/tmp/path/to/webpages",
+
+      // MAYBE use file URI instead of path
+      // Base uri for the resource to be searched/globbed
+      // "base_uri":"file:///C:/tmp/path/to/webpages",
+
+      "globber": {
+        // list of globbing pattern
+        "patterns": [
+          "*.html"
+        ]
+      },
+
+      // Collection Specific Indexer Mapping
+      // file extension -> IndexerBuidingConfig
+      "indexer_mapping": {
+        ".html": {
+          // specify the python module path to the module to be use
+          "module":"pkms.indexer.HtmlIndexer",
+          // Index config to inheritance from
+          // Value:
+          // null: for no base config, just use the config specified here
+          // "builtin": use builtin (defined inside pkms python module) config as base
+          // "global": use specified indexer config defined in global indexer_mapping.<ext>.config
+          // "default": use implementation defined value to be the base config,
+          //            default is "global"
+          "config_base": "global",
+          "config": { /* config for specific indexer */ }
+        }
+      },
+      "upserter": { /* upserter config */ }
+    }
+  ]
+}

@@ -9,3 +9,7 @@ htmlcov/
 coverage/
 # legacy files
 __LEGACY/
+*.odt
+*.db
+*.txt
+*.html
