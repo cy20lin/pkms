@@ -1,7 +1,8 @@
 .*
 !.gitignore
 .vscode/
-__pycache__/
+**/__pycache__/
+**/*.pyc
 tmp/
 # coverage files
 .coverage

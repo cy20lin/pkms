@@ -41,4 +41,7 @@ adr:
 adr_dry:
 	python ./script/normalize_adr_filenames.py doc/adr --dry_run
 
+tree:
+	tree --gitignore
+
 .PHONY: init test clean coverage lcov dos2unix
