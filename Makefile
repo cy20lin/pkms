@@ -33,4 +33,12 @@ dos2unix:
 	dos2unix test/pkg/**/*.py || true
 	dos2unix test/expect/*.jsonc || true
 
+# Update ADR markdown document filenames
+adr:
+	python ./script/normalize_adr_filenames.py doc/adr
+
+# Dry run of updating ADR markdown document filenames
+adr_dry:
+	python ./script/normalize_adr_filenames.py doc/adr --dry_run
+
 .PHONY: init test clean coverage lcov dos2unix
