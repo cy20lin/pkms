@@ -52,6 +52,14 @@ def should_skip_file(file: str, patterns: list[str]) -> bool:
         return False
     return any(fnmatch.fnmatch(file, pat) for pat in patterns)
 
+def should_keep_file(file: str, patterns: list[str]) -> bool:
+    """
+    Check if file path matches any user-specified skip pattern.
+    """
+    if not patterns:
+        return True
+    return any(fnmatch.fnmatch(file, pat) for pat in patterns)
+
 # Language mapping for syntax highlighting
 lang_map = {
     # Programming languages
@@ -129,7 +137,7 @@ def detect_language(file_path: Path) -> str:
 def export_git_project_to_markdown(repo_dir: Path, output_file: Path,
                                    extensions=None, include_index=True,
                                    binary_skip=False, preserve_newline=False,
-                                   skip_filepath_patterns=None):
+                                   keep_patterns=None, skip_patterns=None):
     files = get_git_files(repo_dir)
 
     with output_file.open("w", encoding="utf-8", newline="\n") as out:
@@ -141,7 +149,9 @@ def export_git_project_to_markdown(repo_dir: Path, output_file: Path,
             for file in files:
                 if extensions and not any(file.endswith(ext) for ext in extensions):
                     continue
-                if should_skip_file(file, skip_filepath_patterns):
+                if should_skip_file(file, skip_patterns):
+                    continue
+                if not should_keep_file(file, keep_patterns):
                     continue
                 out.write(f"- {file}\n")
             out.write("\n---\n\n")
@@ -150,8 +160,11 @@ def export_git_project_to_markdown(repo_dir: Path, output_file: Path,
         for file in files:
             if extensions and not any(file.endswith(ext) for ext in extensions):
                 continue
-            if should_skip_file(file, skip_filepath_patterns):
-                print(f"Skipped by pattern: {file}")
+            if not should_keep_file(file, keep_patterns):
+                print(f"Skipped by keep pattern: {file}")
+                continue
+            if should_skip_file(file, skip_patterns):
+                print(f"Skipped by skip pattern: {file}")
                 continue
 
             display_path = file  # keep Unix style for Markdown
@@ -196,6 +209,8 @@ def main():
     # NOTE
     parser.add_argument("--preserve-original-newline", action="store_true",
                         help="Preserve original CRLF or LF newlines from source files")
+    parser.add_argument("--keep", nargs="*", default=None,
+                        help="Glob patterns of file paths to keep entirely (e.g. '**/*.md')")
     parser.add_argument("--skip", nargs="*", default=None,
                         help="Glob patterns of file paths to skip entirely (e.g. '**/*.html' '**/*.cpp')")
 
@@ -210,7 +225,8 @@ def main():
         include_index=not args.no_index,
         binary_skip=args.binary_skip,
         preserve_newline=args.preserve_original_newline,
-        skip_filepath_patterns=args.skip
+        keep_patterns=args.keep,
+        skip_patterns=args.skip
     )
 
 if __name__ == "__main__":
