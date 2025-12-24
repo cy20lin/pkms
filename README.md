@@ -6,7 +6,6 @@ Its goal is not to replace your editor, note‑taking app, or file system, but t
 
 PKMS is designed around **explicit identity contracts**, **declarative configuration**, and **boring, reliable storage (SQLite)**.
 
-
 ## 🔖 Table Of Contents
 
 - [PKMS – Personal Knowledge Management System](#pkms--personal-knowledge-management-system)
@@ -28,22 +27,21 @@ PKMS is designed around **explicit identity contracts**, **declarative configura
   - [🛣️ Future Directions](#️-future-directions)
   - [✍️ Philosophy](#️-philosophy)
 
-
 ## ✨ Core Ideas
 
 ### 1. Local‑first, offline‑friendly
 
-* Files live on your disk
-* Index lives in SQLite
-* No mandatory cloud, no SaaS dependency
+- Files live on your disk
+- Index lives in SQLite
+- No mandatory cloud, no SaaS dependency
 
 ### 2. Files are first‑class citizens
 
 PKMS treats files as **resources**, not just text blobs:
 
-* Human‑readable file IDs
-* Stable URIs
-* Clear distinction between snapshots and editable content
+- Human‑readable file IDs
+- Stable URIs
+- Clear distinction between snapshots and editable content
 
 ### 3. Explicit identity model
 
@@ -61,14 +59,13 @@ This avoids overloading a single ID with incompatible responsibilities.
 
 Indexing behavior is defined via **JSON config**, not code:
 
-* Global and per‑collection indexer mappings
-* Explicit globbing rules
-* Future‑proof extension points
-
+- Global and per‑collection indexer mappings
+- Explicit globbing rules
+- Future‑proof extension points
 
 ## 🧱 Architecture Overview
 
-```
+```text
 Filesystem
    │
    ▼
@@ -90,10 +87,9 @@ Globber  ──►  Indexer  ──►  Upserter  ──►  SQLite
 | `cli`      | Orchestrate pipelines from command line    |
 | `gui`      | Web UI (NiceGUI, future)                   |
 
-
 ## 📁 Project Structure
 
-```
+```text
 pkms/
 └─ pkg/
    ├─ pkms/
@@ -118,16 +114,15 @@ pkms/
          └ testing/
 ```
 
-
 ## 🗂️ SQLite Schema
 
 The primary table is `files` (name may evolve to `resources` in future versions).
 
 Key characteristics:
 
-* SQLite is the **source of truth** for indexing state
-* No hidden metadata magic
-* Timestamps are explicitly managed by PKMS
+- SQLite is the **source of truth** for indexing state
+- No hidden metadata magic
+- Timestamps are explicitly managed by PKMS
 
 ### Time semantics
 
@@ -138,25 +133,23 @@ Key characteristics:
 | `file_created_datetime`   | File system creation time |
 | `file_modified_datetime`  | File system modified time |
 
-
 ## 🧩 Indexer Model
 
 Indexers are responsible for **interpreting a file**, not deciding *where* it goes.
 
 Different indexers exist for different formats:
 
-* HTML snapshots
-* Markdown notes
-* PDFs
-* Open Document Format (ODF) files
-* Audio / Video (future)
+- HTML snapshots
+- Markdown notes
+- PDFs
+- Open Document Format (ODF) files
+- Audio / Video (future)
 
 Indexers:
 
-* Are pure (input → structured output)
-* Accept configuration
-* Do **not** talk to the database
-
+- Are pure (input → structured output)
+- Accept configuration
+- Do **not** talk to the database
 
 ## ⚙️ Configuration
 
@@ -164,13 +157,12 @@ PKMS uses a JSON‑based configuration file.
 
 Highlights:
 
-* Versioned (`version: "0.1.0"`)
-* Global indexer mappings
-* Per‑collection overrides
-* Clear inheritance rules (`config_base`)
+- Versioned (`version: "0.1.0"`)
+- Global indexer mappings
+- Per‑collection overrides
+- Clear inheritance rules (`config_base`)
 
 See **Config Spec v0.1** for the full contract.
-
 
 ## 🚧 Project Status
 
@@ -178,38 +170,36 @@ See **Config Spec v0.1** for the full contract.
 
 Current focus:
 
-* globber
-* indexer
-* upserter
-* CLI
+- globber
+- indexer
+- upserter
+- CLI
 
 Deferred:
 
-* search UI
-* URI handlers
-* cross‑device sync
-* version graph / deduplication
-
+- search UI
+- URI handlers
+- cross‑device sync
+- version graph / deduplication
 
 ## 🧠 Non‑Goals
 
 PKMS intentionally does **not** aim to:
 
-* Replace Obsidian / editors
-* Enforce a single note format
-* Auto‑generate content via LLMs
-* Act as a cloud sync service
+- Replace Obsidian / editors
+- Enforce a single note format
+- Auto‑generate content via LLMs
+- Act as a cloud sync service
 
 It is a **substrate**, not a product.
 
-
 ## 🛣️ Future Directions
 
-* SQLite FTS integration
-* URI rewrite / pkms:// scheme
-* Versioned resources
-* Multi‑device indexing
-* Optional external search engines (Meilisearch)
+- SQLite FTS integration
+- URI rewrite / pkms:// scheme
+- Versioned resources
+- Multi‑device indexing
+- Optional external search engines (Meilisearch)
 
 ## ✍️ Philosophy
 
