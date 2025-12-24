@@ -7,6 +7,7 @@ This document contains:
 
 It is intended for both current and future developers and contributors.
 
+Some ADRs govern project conventions and design process, not runtime behavior.
 
 ## Table of Contents
 
