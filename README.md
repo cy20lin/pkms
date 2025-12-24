@@ -2,6 +2,8 @@
 
 PKMS is a **local‑first, file‑centric personal knowledge indexing system**.
 
+PKMS acquires external resources into owned storage, ingests them into structured indexed knowledge, enables retrieval and linking, and resolves symbolic references (URIs) into concrete actions or representations across tools and systems.
+
 Its goal is not to replace your editor, note‑taking app, or file system, but to **index, normalize, and search heterogeneous personal resources** (HTML snapshots, Markdown notes, PDFs, media files, etc.) in a stable, extensible, and automation‑friendly way.
 
 PKMS is designed around **explicit identity contracts**, **declarative configuration**, and **boring, reliable storage (SQLite)**.
