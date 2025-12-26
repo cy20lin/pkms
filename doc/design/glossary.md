@@ -26,7 +26,7 @@ Terms are written to establish **shared mental models** and **stable vocabulary*
     - [Upserter](#upserter)
   - [Data Models \& Identity](#data-models--identity)
     - [IndexedDocument](#indexeddocument)
-    - [FileDescriptor](#filedescriptor)
+    - [FileLocation](#filelocation)
     - [file\_id](#file_id)
     - [file\_uid](#file_uid)
     - [Internal Sequence ID](#internal-sequence-id)
@@ -264,17 +264,16 @@ Characteristics:
 
 This is a **hard boundary** between ingestion logic and storage.
 
-### FileDescriptor
+### FileLocation
 
-A structured description of a resource’s physical and identity attributes.
+A structured description of a resource’s location.
 
 Includes:
 
-- file\_id
-- file\_uid
-- file\_uri
-- file hash
-- timestamps
+- scheme: Currently `"file"`
+- authority: Currently `"file"`
+- base_path: the Base path to the file
+- relative_path: the relative path to the base
 
 ---
 

@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from ..model import FileDescriptor, IndexedDocument
+from ..model import FileLocation, IndexedDocument
 
 class Indexer(ABC):
 
     @abstractmethod
-    def index(self, file: FileDescriptor) -> IndexedDocument:
+    def index(self, file: FileLocation) -> IndexedDocument:
         ...

@@ -8,12 +8,11 @@ class GlobberConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     patterns: List[str] = Field(
-        ...,
-        # min_length=1,
+        default=[],
         description="Glob patterns relative to base_path"
     )
 
-    # exclude: List[str] = Field(
-    #     default_factory=list,
-    #     description="Exclude glob patterns"
-    # )
+    negate: bool = Field(
+        default=False,
+        description="Negate glob patterns"
+    )
