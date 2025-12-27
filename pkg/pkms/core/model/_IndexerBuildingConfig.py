@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Dict, List, Literal
 from pydantic import BaseModel, ConfigDict, Field
+from ._IndexerConfig import IndexerConfig
 
 
 class IndexerBuildingConfig(BaseModel):
@@ -21,6 +22,6 @@ class IndexerBuildingConfig(BaseModel):
     )
 
     config: Dict[str, object] = Field(
-        default_factory=dict,
+        default_factory=IndexerConfig,
         description="Indexer-specific configuration"
     )

@@ -6,7 +6,7 @@ import pathlib
 
 
 class FileLocation(BaseModel):
-    model_config = {"frozen": True}
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     scheme: str = Field(
         default='file',

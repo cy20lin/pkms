@@ -8,8 +8,9 @@ class IndexedDocument(BaseModel):
     Normalized output of an Indexer.
     This is the only object allowed to cross into the Upserter.
     """
-
-    model_config = ConfigDict(extra="forbid")
+    # TODO: 2025-12-26 Decide should allow extra props or not
+    # NOTE: => 2025-12-26 allow for now for faster iteration
+    model_config = ConfigDict(extra="allow")
 
     # Identity
     file_id: str = Field(
@@ -20,6 +21,13 @@ class IndexedDocument(BaseModel):
     file_uid: Optional[str] = Field(
         default=None,
         description="Strong unique identifier (uuid / cuid / hash)"
+    )
+
+    # Location
+    # TODO: Think what type should be used for hash, bytearray or string ?
+    file_hash_sha256: str = Field(
+        default=None,
+        description="SHA256 hash of the file in string"
     )
 
     # Location

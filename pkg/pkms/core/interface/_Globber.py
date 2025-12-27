@@ -3,6 +3,7 @@ from ..model import FileLocation
 from ..model import GlobberConfig
 
 class Globber(ABC):
+    Config: type[GlobberConfig] = GlobberConfig
 
     def __init__(self, config: GlobberConfig):
         self.config = config
