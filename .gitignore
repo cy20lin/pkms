@@ -14,3 +14,4 @@ __LEGACY/
 *.db
 *.txt
 *.html
+/*.jsonc
