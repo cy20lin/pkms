@@ -4,7 +4,7 @@ import os
 import glob
 import datetime
 import argparse
-from pkms.index_singlefile_html import (
+from pkms.core.utility import (
     get_file_content,
     index_html_file,
     parse_singlefile_html_metadata,
