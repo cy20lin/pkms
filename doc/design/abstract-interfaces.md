@@ -40,12 +40,12 @@ Each component:
 
 ## Core Concepts
 
-### FileDescriptor
+### FileLocation
 
 Represents a discovered file **before content processing**.
 
 ```python
-class FileDescriptor:
+class FileLocation:
     file_uri: str
     file_extension: str
     file_size: int
@@ -110,14 +110,14 @@ class IndexedDocument:
 #### Responsibility
 
 * Discover candidate files under a base path
-* Produce `FileDescriptor` objects
+* Produce `FileLocation` objects
 
 #### Interface
 
 ```python
 class Globber(ABC):
     @abstractmethod
-    def glob(self) -> list[FileDescriptor]:
+    def glob(self) -> list[FileLocation]:
         pass
 ```
 
@@ -141,7 +141,7 @@ class Globber(ABC):
 ```python
 class Indexer(ABC):
     @abstractmethod
-    def index(self, file: FileDescriptor) -> IndexedDocument:
+    def index(self, file: FileLocation) -> IndexedDocument:
         pass
 ```
 
@@ -217,12 +217,12 @@ classDiagram
     CLI --> IndexerRegistry
     CLI --> Upserter
 
-    Globber --> FileDescriptor
+    Globber --> FileLocation
     Indexer --> IndexedDocument
     Upserter --> IndexedDocument
 
     class Globber {
-        +glob() FileDescriptor[]
+        +glob() FileLocation[]
     }
 
     class Indexer {
@@ -241,7 +241,7 @@ classDiagram
 ```mermaid
 sequenceDiagram
     CLI->>Globber: glob()
-    Globber-->>CLI: FileDescriptor[]
+    Globber-->>CLI: FileLocation[]
 
     loop for each file
         CLI->>Indexer: index(file)
