@@ -44,4 +44,4 @@ adr_dry:
 tree:
 	tree --gitignore
 
-.PHONY: init test clean coverage lcov dos2unix
+.PHONY: init test clean coverage lcov dos2unix adr adr_dry tree
