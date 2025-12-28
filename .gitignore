@@ -6,6 +6,7 @@
 tmp/
 # coverage files
 .coverage
+*.lcov
 htmlcov/
 coverage/
 # legacy files
