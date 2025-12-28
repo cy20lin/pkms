@@ -8,5 +8,5 @@ class UpserterConfig(BaseModel):
 
     db_path: str = Field(
         ...,
-        description="Path to SQLite database"
+        description="Path to database"
     )

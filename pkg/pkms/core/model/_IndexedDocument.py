@@ -24,24 +24,32 @@ class IndexedDocument(BaseModel):
     )
 
     # Location
+
+    file_uri: str = Field(
+        ...,
+        description="Canonical file URI (file://...)"
+    )
+
+    # Integrity
+    file_size: int = Field(
+        default=None,
+        description="File size in bytes"
+    )
+
     # TODO: Think what type should be used for hash, bytearray or string ?
     file_hash_sha256: str = Field(
         default=None,
         description="SHA256 hash of the file in string"
     )
 
-    # Location
-    file_uri: str = Field(
-        ...,
-        description="Canonical file URI (file://...)"
-    )
+    # Classification
 
     file_extension: str = Field(
         ...,
         description="File extension with leading dot, or empty string"
     )
 
-    # Classification
+
     file_kind: Literal["snapshot", "editable"] = Field(
         ...,
         description="Content mutability classification"
@@ -63,6 +71,12 @@ class IndexedDocument(BaseModel):
         default=None,
         description="Original source URI (e.g. http(s) URL)"
     )
+
+    #
+    file_created_datetime: str
+    file_modified_datetime: str
+    index_created_datetime: str
+    index_updated_datetime: str
 
     # Content
     text: Optional[str] = Field(

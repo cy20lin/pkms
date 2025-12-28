@@ -7,3 +7,4 @@ from ._GlobberConfig import GlobberConfig
 from ._UpserterConfig import UpserterConfig
 from ._IndexerBuildingConfig import IndexerBuildingConfig
 from ._IndexerConfig import IndexerConfig
+from ._FilesDbRecord import FilesDbRecord

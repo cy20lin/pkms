@@ -1,6 +1,10 @@
 import hashlib
 import re
 import pathlib
+from ._sql import (
+    extract_sql_params,
+    assert_sql_model_aligned
+)
 
 def get_file_content(file_path):
     file = open(file_path, "r", encoding='utf-8')
