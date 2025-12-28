@@ -1,2 +1,2 @@
 
-from .HtmlIndexer import HtmlIndexer
+from ._HtmlIndexer import HtmlIndexer

@@ -1,5 +1,5 @@
 from pkms.core.model import FileLocation
-from pkms.core.model import IndexedDocument
+from pkms.core.model import IndexedDocument, IndexerConfig
 from pkms.core.interface import Indexer
 from pkms.core.utility import *
 
@@ -343,7 +343,7 @@ def extract_links(html: str, page_url: str) -> list:
             "uri": tag['href'],
             "tag": tag.name,
             "rel": tag.get("rel")[0] if tag.get("rel") else None,
-            "selector": build_selector(tag)
+            "selector": build_html_selector(tag)
         })
 
     return results
@@ -430,7 +430,12 @@ def index_html_file(file_path):
     }
     return index
 
+HtmlIndexerConfig = IndexerConfig
 class HtmlIndexer(Indexer):
+    Config = HtmlIndexerConfig
+
+    def __init__(self, config: HtmlIndexerConfig):
+        super().__init__(config=config)
 
     def index(self, file_location: FileLocation) -> IndexedDocument:
         assert file_location.scheme == 'file'
