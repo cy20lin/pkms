@@ -9,8 +9,10 @@ import os
 def _try_append_slash(path:str):
     return path+'/' if not path.endswith('/') else path
 
+PathspecGlobberConfig = GlobberConfig
 class PathspecGlobber(Globber):
-    def __init__(self, config:GlobberConfig):
+    Config = PathspecGlobberConfig
+    def __init__(self, config:PathspecGlobberConfig):
         super().__init__(config=config)
         self._pathspec = pathspec.PathSpec.from_lines(pattern_factory='gitignore', lines=config.patterns)
     
