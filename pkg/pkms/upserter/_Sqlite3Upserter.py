@@ -51,6 +51,33 @@ CREATE TABLE IF NOT EXISTS files (
     text TEXT,
     extra JSON
 );
+
+CREATE VIRTUAL TABLE IF NOT EXISTS files_fts USING fts5(
+    title,
+    text,
+    content='files',
+    content_rowid='id'
+);
+
+-- files_ai : after insert trigger to sync files -> files_fts
+CREATE TRIGGER IF NOT EXISTS files_ai AFTER INSERT ON files BEGIN
+  INSERT INTO files_fts(rowid, title, text)
+  VALUES (new.id, new.title, new.text);
+END;
+
+-- files_ad : after delete trigger to sync files -> files_fts
+CREATE TRIGGER IF NOT EXISTS files_ad AFTER DELETE ON files BEGIN
+  INSERT INTO files_fts(files_fts, rowid, title, text)
+  VALUES('delete', old.id, old.title, old.text);
+END;
+
+-- files_au : after update trigger to sync files -> files_fts
+CREATE TRIGGER IF NOT EXISTS files_au AFTER UPDATE ON files BEGIN
+  INSERT INTO files_fts(files_fts, rowid, title, text)
+  VALUES('delete', old.id, old.title, old.text);
+  INSERT INTO files_fts(rowid, title, text)
+  VALUES (new.id, new.title, new.text);
+END;
 """
 
 UPSERT_SQL = """
@@ -160,7 +187,7 @@ class Sqlite3Upserter(Upserter):
         Initialize Database
         """
         self._connection.execute("PRAGMA journal_mode=WAL;")
-        self._connection.execute(SCHEMA_SQL)
+        self._connection.executescript(SCHEMA_SQL)
         self._connection.commit()
     
     # DONE: Decide Should use [IndexedDocument] vs IndexedDocument as input => Use single IndexedDocument
@@ -184,9 +211,8 @@ class Sqlite3Upserter(Upserter):
         :param indexed_document: Description
         :type indexed_document: IndexedDocument
         """
-        has_connection = self._connection is not None
-        if not has_connection: 
-            raise RuntimeError("Upsert is closed")
+        if self._connection is None:
+            raise RuntimeError("Upserter is closed")
 
         file_db_record: FilesDbRecord = to_files_db_record(indexed_document)
         file_db_record_dict: dict = file_db_record.model_dump()
