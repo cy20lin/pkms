@@ -74,6 +74,9 @@ def conn(upserter):
 # --------------------------
 
 def test_fts_basic_search(upserter, conn):
+    '''
+    Basic full-text search is usable
+    '''
     upserter.upsert(make_doc("file-1", text="hello sqlite fts"))
     upserter.upsert(make_doc("file-2", text="nothing relevant"))
 
@@ -82,6 +85,9 @@ def test_fts_basic_search(upserter, conn):
 
 
 def test_fts_updates_on_upsert(upserter, conn):
+    '''
+    UPDATE (upsert) will synchronously update FTS
+    '''
     upserter.upsert(make_doc("file-1", text="old content"))
     upserter.upsert(make_doc("file-1", text="new searchable content"))
 
@@ -93,6 +99,9 @@ def test_fts_updates_on_upsert(upserter, conn):
 
 
 def test_fts_transaction_rollback(upserter, conn):
+    '''
+    FTS will not remain after a transaction rollback
+    '''
     good = make_doc("good", text="visible")
     bad = make_doc("bad", text="should rollback")
 
@@ -109,6 +118,9 @@ def test_fts_transaction_rollback(upserter, conn):
 
 
 def test_fts_batch_upsert(upserter, conn):
+    '''
+    FTS results are correct for multiple upserts in a batch
+    '''
     docs = [
         make_doc("a", text="alpha beta"),
         make_doc("b", text="beta gamma"),
