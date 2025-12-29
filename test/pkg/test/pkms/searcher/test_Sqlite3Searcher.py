@@ -184,3 +184,30 @@ def test_limit_is_capped_by_config(searcher):
     results = searcher.search(args)
 
     assert results.limit <= searcher.config.max_limit
+
+import threading
+from pkms.core.model import SearchArguments
+
+def test_searcher_is_thread_safe(searcher):
+    """
+    Searcher should support concurrent search calls across threads
+    using a shared Searcher instance.
+    """
+
+    errors = []
+
+    def worker():
+        try:
+            args = SearchArguments(query="hello", limit=5, offset=0)
+            result = searcher.search(args)
+            assert result.hits is not None
+        except Exception as e:
+            errors.append(e)
+
+    threads = [threading.Thread(target=worker) for _ in range(5)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert errors == []
