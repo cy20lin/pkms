@@ -35,16 +35,20 @@ class Sqlite3Searcher(Searcher):
 
     def __init__(self, *, config: SearcherConfig):
         super().__init__(config=config)
-        self._conn = sqlite3.connect(config.db_path)
-        self._conn.row_factory = sqlite3.Row
+
+    def _connect(self):
+        conn = sqlite3.connect(self.config.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
 
     def search(self, args: SearchArguments) -> SearchResult:
         limit = min(args.limit, self.config.max_limit)
 
-        cur = self._conn.execute(
-            SEARCH_SQL,
-            (args.query, limit, args.offset),
-        )
+        with self._connect() as conn:
+            cur = conn.execute(
+                SEARCH_SQL,
+                (args.query, limit, args.offset),
+            )
 
         hits = []
         for row in cur.fetchall():
@@ -67,6 +71,4 @@ class Sqlite3Searcher(Searcher):
         )
 
     def close(self):
-        if self._conn:
-            self._conn.close()
-            self._conn = None
+        pass
