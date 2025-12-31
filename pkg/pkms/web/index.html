@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PKMS Search</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 120px auto 40px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 24px;
+    }
+
+    input[type="text"] {
+      width: 80%;
+      font-size: 18px;
+      padding: 10px 14px;
+      border-radius: 24px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    button {
+      margin-top: 16px;
+      padding: 8px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background: #f8f8f8;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #eee;
+    }
+
+    .results {
+      margin-top: 40px;
+      text-align: left;
+    }
+
+    .result-item {
+      margin-bottom: 20px;
+    }
+
+    .result-title {
+      font-size: 18px;
+      color: #1a0dab;
+    }
+
+    .result-meta {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .result-snippet {
+      font-size: 14px;
+      color: #444;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .pagination {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .pagination button {
+      margin: 0 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>PKMS</h1>
+
+  <input
+    id="queryInput"
+    type="text"
+    placeholder="Search your knowledge…"
+    autofocus
+  />
+
+  <div>
+    <button onclick="doSearch(0)">Search</button>
+  </div>
+
+  <div id="result" class="result"></div>
+
+  <div id="pagination" class="pagination" style="display:none;">
+    <button onclick="prevPage()">Prev</button>
+    <button onclick="nextPage()">Next</button>
+  </div>
+</div>
+
+<script>
+  const LIMIT = 5;
+  let currentQuery = "";
+  let currentOffset = 0;
+
+  async function doSearch(offset) {
+    const query = document.getElementById("queryInput").value.trim();
+    if (!query) return;
+
+    currentQuery = query;
+    currentOffset = offset;
+
+    const url = `/api/search?q=${encodeURIComponent(query)}&limit=${LIMIT}&offset=${offset}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    renderResultHits(data.hits);
+    updatePagination(data.hits.length);
+  }
+
+  function renderResultHits(hits) {
+    const container = document.getElementById("result");
+    container.innerHTML = "";
+
+    if (hits.length === 0) {
+      container.innerHTML = "<p>No results found.</p>";
+      return;
+    }
+
+    for (const r of hits) {
+      const div = document.createElement("div");
+      div.className = "result-item";
+
+      div.innerHTML = `
+        <div class="result-title">
+          <a href="/api/view/${r.file_id}">${r.title}</a>
+        </div>
+        ${r.snippet ? `<div class="result-snippet">${r.snippet}</div>` : ""}
+        <div class="result-meta">file_id: ${r.file_id}</div>
+      `;
+
+      container.appendChild(div);
+    }
+  }
+
+  function updatePagination(resultCount) {
+    const pagination = document.getElementById("pagination");
+    pagination.style.display = "block";
+
+    // Disable prev if at first page
+    pagination.querySelector("button:nth-child(1)").disabled =
+      currentOffset === 0;
+
+    // Disable next if less than limit
+    pagination.querySelector("button:nth-child(2)").disabled =
+      resultCount < LIMIT;
+  }
+
+  function prevPage() {
+    if (currentOffset === 0) return;
+    doSearch(currentOffset - LIMIT);
+  }
+
+  function nextPage() {
+    doSearch(currentOffset + LIMIT);
+  }
+
+  // Enter key triggers search
+  document
+    .getElementById("queryInput")
+    .addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        doSearch(0);
+      }
+    });
+</script>
+
+</body>
+</html>
