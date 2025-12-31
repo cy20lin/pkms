@@ -4,15 +4,20 @@
 **/__pycache__/
 **/*.pyc
 tmp/
-# coverage files
+# Coverage files
 .coverage
 *.lcov
 htmlcov/
 coverage/
-# legacy files
+# Legacy files
 __LEGACY/
+# Documents and configs
 *.odt
-*.db
 *.txt
 *.html
+!pkg/**/*.html
 /*.jsonc
+# Sqlite database related files
+**/*.db
+**/*.db-shm
+**/*.db-wal
