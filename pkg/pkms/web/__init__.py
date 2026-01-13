@@ -5,9 +5,12 @@ from typing import Optional
 
 from flask import Flask, request, jsonify, send_file
 
-from pkms.core.interface import Searcher
-from pkms.core.model import (
+from pkms.core.component.searcher import (
+    Searcher,
     SearcherConfig,
+)
+
+from pkms.core.model import (
     SearchArguments,
     SearchResult,
 )
@@ -17,6 +20,7 @@ import os
 from dataclasses import dataclass
 import sqlite3
 import urllib
+
 # =========================
 # Models
 # =========================
@@ -168,7 +172,7 @@ def create_app(searcher: Searcher, resolver: UriResolver) -> Flask:
 # ---------- Composition Root ----------
 
 def build_searcher(db_path: str) -> Searcher:
-    config = SearcherConfig(db_path=db_path, max_limit=100)
+    config = Sqlite3Searcher.Config(db_path=db_path, max_limit=100)
     return Sqlite3Searcher(config=config)
 
 

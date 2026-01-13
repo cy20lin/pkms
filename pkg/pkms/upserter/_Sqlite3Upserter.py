@@ -1,8 +1,12 @@
-from pkms.core.model import IndexedDocument, UpserterConfig, FilesDbRecord
-from pkms.core.interface import Upserter
+from pkms.core.model import IndexedDocument, FilesDbRecord
+from pkms.core.component.upserter import (
+    Upserter,
+    UpserterConfig,
+    UpserterRuntime
+)
 from pkms.core.utility import *
 
-from typing import Optional
+from typing import Optional, Literal
 import json
 import sqlite3
 import sys
@@ -169,13 +173,17 @@ def to_files_db_record(
 
 from contextlib import contextmanager
 
-Sqlite3UpserterConfig = Upserter.Config
+class Sqlite3UpserterConfig(UpserterConfig):
+    type: Literal['Sqlite3UpserterConfig'] = 'Sqlite3UpserterConfig'
+
+class Sqlite3UpserterRuntime(UpserterRuntime):
+    pass
 
 class Sqlite3Upserter(Upserter):
     Config = Sqlite3UpserterConfig
 
-    def __init__(self, config:Sqlite3UpserterConfig):
-        super().__init__(config=config)
+    def __init__(self, config:Sqlite3UpserterConfig, runtime: Optional[Sqlite3UpserterRuntime] = None):
+        super().__init__(config=config, runtime=None)
         assert self.config
         self._in_transaction = False
         self._connection = sqlite3.connect(config.db_path)

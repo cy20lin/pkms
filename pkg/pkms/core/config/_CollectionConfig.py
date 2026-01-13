@@ -4,8 +4,8 @@ from typing import Optional, Dict, List, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from ._IndexerBuildingConfig import IndexerBuildingConfig
-from ._GlobberConfig import GlobberConfig
-from ._UpserterConfig import UpserterConfig
+from ..component.globber._GlobberConfig import GlobberConfig
+from ..component.upserter._UpserterConfig import UpserterConfig
 
 
 class CollectionConfig(BaseModel):

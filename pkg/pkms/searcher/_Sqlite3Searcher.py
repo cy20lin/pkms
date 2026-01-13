@@ -1,7 +1,11 @@
 import sqlite3
-from pkms.core.interface import Searcher
-from pkms.core.model import (
+from typing import Optional, Literal
+from pkms.core.component.searcher import (
+    Searcher,
     SearcherConfig,
+    SearcherRuntime,
+)
+from pkms.core.model import (
     SearchArguments,
     SearchResult,
     SearchHit,
@@ -29,12 +33,18 @@ ORDER BY score
 LIMIT ? OFFSET ?;
 """
 
+class Sqlite3SearcherConfig(SearcherConfig):
+    type: Literal['Sqlite3SearcherConfig'] = 'Sqlite3SearcherConfig'
+
+class Sqlite3SearcherRuntime(SearcherRuntime):
+    pass
 
 class Sqlite3Searcher(Searcher):
-    Config = SearcherConfig
+    Config = Sqlite3SearcherConfig
+    Runtime = Sqlite3SearcherRuntime
 
-    def __init__(self, *, config: SearcherConfig):
-        super().__init__(config=config)
+    def __init__(self, *, config: Sqlite3SearcherConfig, runtime: Optional[Sqlite3SearcherRuntime] = None):
+        super().__init__(config=config, runtime=runtime)
 
     def _connect(self):
         conn = sqlite3.connect(self.config.db_path)

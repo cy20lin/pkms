@@ -1,19 +1,31 @@
-from pkms.core.interface._Globber import Globber
+from typing import Optional, Union, Dict, List, Literal
 import pathspec
 import logging
 import pathlib
 from pkms.core.model import FileLocation
-from pkms.core.model import GlobberConfig
+from pkms.core.component.globber import (
+    Globber,
+    GlobberConfig,
+    GlobberRuntime,
+)
 import os
 
 def _try_append_slash(path:str):
     return path+'/' if not path.endswith('/') else path
 
-PathspecGlobberConfig = GlobberConfig
+class PathspecGlobberConfig(GlobberConfig):
+    type: Literal['PathspecGlobblerConfig'] = 'PathspecGlobberConfig'
+
+class PathspecGlobberRuntime(GlobberRuntime):
+    pass
+
 class PathspecGlobber(Globber):
     Config = PathspecGlobberConfig
-    def __init__(self, config:PathspecGlobberConfig):
-        super().__init__(config=config)
+    Runtime = PathspecGlobberRuntime
+    type: str = Literal['hello']
+
+    def __init__(self, config:PathspecGlobberConfig, runtime:PathspecGlobberRuntime=None):
+        super().__init__(config=config, runtime=runtime)
         self._pathspec = pathspec.PathSpec.from_lines(pattern_factory='gitignore', lines=config.patterns)
     
     def glob(self, base_path:str) -> FileLocation:

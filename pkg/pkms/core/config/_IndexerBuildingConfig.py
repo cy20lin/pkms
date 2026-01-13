@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Dict, List, Literal
 from pydantic import BaseModel, ConfigDict, Field
-from ._IndexerConfig import IndexerConfig
+from ..component.indexer._IndexerConfig import IndexerConfig
 
 
 class IndexerBuildingConfig(BaseModel):

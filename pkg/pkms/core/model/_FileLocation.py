@@ -35,4 +35,4 @@ class FileLocation(BaseModel):
 
     @property
     def uri(self) -> str:
-        return pathlib.Path(self.path).as_uri()
+        return pathlib.Path(self.path).absolute().as_uri()

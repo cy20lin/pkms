@@ -1,6 +1,11 @@
+from typing import Literal,Optional
 from pkms.core.model import FileLocation
-from pkms.core.model import IndexedDocument, IndexerConfig
-from pkms.core.interface import Indexer
+from pkms.core.model import IndexedDocument
+from pkms.core.component.indexer import (
+    Indexer,
+    IndexerConfig,
+    IndexerRuntime
+)
 from pkms.core.utility import *
 
 from urllib.parse import urljoin, urlparse, parse_qsl, urlunparse, urlencode
@@ -430,12 +435,18 @@ def index_html_file(file_path):
     }
     return index
 
-HtmlIndexerConfig = IndexerConfig
+class HtmlIndexerConfig(IndexerConfig):
+    type: Literal['HtmlIndexerConfig'] = 'HtmlIndexerConfig'
+
+class HtmlIndexerRuntime(IndexerRuntime):
+    pass
+
 class HtmlIndexer(Indexer):
     Config = HtmlIndexerConfig
+    Runtime = HtmlIndexerRuntime
 
-    def __init__(self, config: HtmlIndexerConfig):
-        super().__init__(config=config)
+    def __init__(self, config: HtmlIndexerConfig, runtime: Optional[HtmlIndexerRuntime] = None):
+        super().__init__(config=config, runtime=runtime)
 
     def index(self, file_location: FileLocation) -> IndexedDocument:
         assert file_location.scheme == 'file'
