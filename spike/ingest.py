@@ -38,12 +38,14 @@ def ingest_html_collection(collection_path, db_path, dry_run):
 import argparse
 import sys
 
-def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+def str_to_bool(s: str):
+    if s.isupper():
+        ss = s.lower()
+    else:
+        ss = s[0].lower() + s[1:]
+    if ss in ('1','y','t','yes','true','on'):
         return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0', 'nil', 'null'):
+    elif ss in ('0','n','f','no','false','off'):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
@@ -51,8 +53,8 @@ def str2bool(v):
 def parse_args(argv:list[str]=None):
     parser = argparse.ArgumentParser("Ingest specified collection of owned file resources")
     parser.add_argument("config_path")
-    parser.add_argument('--dry-run', help='Just print instead of renaming the files',default=None, const=True, nargs='?', type=str2bool)
-    parser.add_argument('--verbose', help='Print Verbosely',default=True, const=True, nargs='?', type=str2bool)
+    parser.add_argument('--dry-run', help='Just print instead of renaming the files',default=None, const=True, nargs='?', type=str_to_bool)
+    parser.add_argument('--verbose', help='Print Verbosely',default=True, const=True, nargs='?', type=str_to_bool)
     return parser.parse_args(argv[1:])
     
 from pydantic import BaseModel, Field, ConfigDict
