@@ -1,9 +1,12 @@
 import sqlite3
 import pytest
 
-from pkms.searcher import Sqlite3Searcher
+from pkms.searcher import (
+    Sqlite3Searcher,
+    Sqlite3SearcherConfig,
+    Sqlite3SearcherRuntime,
+)
 from pkms.core.model import (
-    SearcherConfig,
     SearchArguments,
     SearchResult,
     SearchHit,
@@ -92,7 +95,7 @@ def sqlite_db(tmp_path):
 
 @pytest.fixture
 def searcher(sqlite_db):
-    config = SearcherConfig(
+    config = Sqlite3SearcherConfig(
         db_path=sqlite_db,
         default_limit=20,
         max_limit=50,
@@ -211,3 +214,56 @@ def test_searcher_is_thread_safe(searcher):
         t.join()
 
     assert errors == []
+
+# Test query wrap
+from pkms.searcher._Sqlite3Searcher import (
+    wrap_text_search_query
+)
+
+@pytest.mark.parametrize(
+    "input_query, expected",
+    [
+        (
+            "hello world",
+            '"hello" AND "world"',
+        ),
+        (
+            '"hello   world"',
+            '"hello   world"',
+        ),
+        (
+            "hello-world",
+            '"hello-world"',
+        ),
+        (
+            "-world",
+            'NOT "world"',
+        ),
+        (
+            "foo -bar baz",
+            '"foo" AND NOT "bar" AND "baz"',
+        ),
+        (
+            "",
+            '""',
+        ),
+        (
+            "   ",
+            '""',
+        ),
+        (
+            '"quoted" word',
+            '"quoted" AND "word"',
+        ),
+        (
+            '-"exact phrase"',
+            'NOT "exact phrase"',
+        ),
+        (
+            'a:b c+d',
+            '"a:b" AND "c+d"',
+        ),
+    ],
+)
+def test_wrap_text_search_query(input_query, expected):
+    assert wrap_text_search_query(input_query) == expected

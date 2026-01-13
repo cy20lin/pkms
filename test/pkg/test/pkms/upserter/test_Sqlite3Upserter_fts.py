@@ -3,7 +3,7 @@ import pytest
 
 from pkms.upserter._Sqlite3Upserter import Sqlite3Upserter
 from pkms.core.model import IndexedDocument
-from pkms.core.interface import Upserter
+from pkms.core.component.upserter import Upserter
 import datetime
 
 # --------------------------
