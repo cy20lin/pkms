@@ -3,7 +3,7 @@ init:
 
 test:
     # python -m unittest discover -s test/pkg -p "test*.py"
-    pytest -v test/pkg/test
+    pytest -vv test/pkg/test
 
 clean:
     python -Bc "import pathlib; [p.unlink() for p in pathlib.Path('.').rglob('*.py[co]')]"
