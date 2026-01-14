@@ -1,11 +1,11 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, Dict, Any
+from typing import TypeAlias
 from ._FileLocation import FileLocation
 
-class ScreenCandidate(FileLocation):
-    """
-    A candidate file discovered by Globber,
-    pending screening before indexing.
-    """
-    pass
+ScreenCandidate: TypeAlias = FileLocation
+"""
+A candidate file discovered by Globber,
+pending screening before indexing.
+"""
+
+__all__ = ['ScreenCandidate']
 

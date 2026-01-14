@@ -11,14 +11,14 @@ from ._ScreeningResult import ScreeningResult
 from ._ScreeningStatus import ScreeningStatus
 
 __all__ = [
-    FileLocation,
-    IndexedDocument,
-    FilesDbRecord,
-    SearchHit,
-    SearchArguments,
-    SearchResult,
-    ScreenedFile,
-    ScreenCandidate,
-    ScreeningStatus,
-    ScreeningResult,
+    'FileLocation',
+    'IndexedDocument',
+    'FilesDbRecord',
+    'SearchHit',
+    'SearchArguments',
+    'SearchResult',
+    'ScreenedFile',
+    'ScreenCandidate',
+    'ScreeningStatus',
+    'ScreeningResult',
 ]
