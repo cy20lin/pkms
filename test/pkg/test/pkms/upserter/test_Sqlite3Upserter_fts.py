@@ -1,7 +1,7 @@
 import sqlite3
 import pytest
 
-from pkms.upserter._Sqlite3Upserter import Sqlite3Upserter
+from pkms.component.upserter import Sqlite3Upserter
 from pkms.core.model import IndexedDocument
 from pkms.core.component.upserter import Upserter
 import datetime
@@ -55,7 +55,7 @@ def fts_search(conn: sqlite3.Connection, query: str) -> list[str]:
 @pytest.fixture
 def upserter(tmp_path):
     db_path = tmp_path / "fts.db"
-    config = Upserter.Config(db_path=db_path.as_posix())
+    config = Sqlite3Upserter.Config(db_path=db_path.as_posix())
     u = Sqlite3Upserter(config)
     yield u
     u.close()

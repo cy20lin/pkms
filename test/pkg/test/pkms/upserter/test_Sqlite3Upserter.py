@@ -1,5 +1,5 @@
 
-from pkms.upserter._Sqlite3Upserter import UPSERT_SQL
+from pkms.component.upserter._Sqlite3Upserter import UPSERT_SQL
 from pkms.core.model import FilesDbRecord
 from pkms.core.utility import assert_sql_model_aligned
 
@@ -17,7 +17,7 @@ from datetime import datetime
 import pytest
 
 from pkms.core.model import IndexedDocument
-from pkms.upserter import Sqlite3Upserter
+from pkms.component.upserter import Sqlite3Upserter
 Sqlite3UpserterConfig = Sqlite3Upserter.Config
 
 # --------------------------

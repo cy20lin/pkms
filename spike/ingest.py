@@ -1,6 +1,6 @@
-from pkms.globber import PathspecGlobber
-from pkms.indexer import HtmlIndexer
-from pkms.upserter import Sqlite3Upserter
+from pkms.component.globber import PathspecGlobber
+from pkms.component.indexer import HtmlIndexer
+from pkms.component.upserter import Sqlite3Upserter
 import commentjson as json
 
 def ingest_html_collection(collection_path, db_path, dry_run):

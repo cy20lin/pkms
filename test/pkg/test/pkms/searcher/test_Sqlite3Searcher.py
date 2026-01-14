@@ -1,7 +1,7 @@
 import sqlite3
 import pytest
 
-from pkms.searcher import (
+from pkms.component.searcher import (
     Sqlite3Searcher,
     Sqlite3SearcherConfig,
     Sqlite3SearcherRuntime,
@@ -216,7 +216,7 @@ def test_searcher_is_thread_safe(searcher):
     assert errors == []
 
 # Test query wrap
-from pkms.searcher._Sqlite3Searcher import (
+from pkms.component.searcher._Sqlite3Searcher import (
     wrap_text_search_query
 )
 

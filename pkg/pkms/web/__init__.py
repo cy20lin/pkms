@@ -14,7 +14,7 @@ from pkms.core.model import (
     SearchArguments,
     SearchResult,
 )
-from pkms.searcher import Sqlite3Searcher
+from pkms.component.searcher import Sqlite3Searcher
 import os
 
 from dataclasses import dataclass
