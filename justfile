@@ -18,10 +18,10 @@ coverage:
     # <test_directory_or_file>
     pytest --cov=pkg/pkms --cov=test/pkg/testing test/pkg/test
 
-coverage_html:
+coverage-html:
     pytest --cov=pkg/pkms --cov=test/pkg/testing --cov-report=html test/pkg/test
 
-coverage_lcov:
+coverage-lcov:
     pytest --cov=pkg/pkms --cov=test/pkg/testing --cov-report=lcov test/pkg/test
 
 dos2unix:
@@ -34,8 +34,11 @@ dos2unix:
 adr:
     python ./script/normalize_adr_filenames.py doc/adr
 
-adr_dry:
+adr-dry:
     python ./script/normalize_adr_filenames.py doc/adr --dry_run
 
 tree:
     tree --gitignore
+
+tree-dir:
+    tree -d --gitignore
