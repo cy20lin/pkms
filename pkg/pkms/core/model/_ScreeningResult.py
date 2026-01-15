@@ -3,7 +3,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, Any, Dict, List, Literal
 from ._ScreeningStatus import ScreeningStatus
-from ._ScreenedFile import ScreenedFile
+from ._FileStamp import FileStamp
 from ._FileLocation import FileLocation
 
 class ScreeningResult(BaseModel):
@@ -17,8 +17,7 @@ class ScreeningResult(BaseModel):
     file_location: FileLocation
 
     # Extracted file identity and related data
-    # FIXME: admitted differ form status APPROVED, select a good name
-    admitted: Optional[ScreenedFile] = None
+    file_stamp: Optional[FileStamp] = None
 
     reason: Optional[str] = Field(
         default=None,

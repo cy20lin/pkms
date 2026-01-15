@@ -5,7 +5,7 @@ from ._FilesDbRecord import FilesDbRecord
 from ._SearchHit import SearchHit
 from ._SearchArguments import SearchArguments
 from ._SearchResult import SearchResult
-from ._ScreenedFile import ScreenedFile
+from ._FileStamp import FileStamp
 from ._ScreenCandidate import ScreenCandidate
 from ._ScreeningResult import ScreeningResult
 from ._ScreeningStatus import ScreeningStatus
@@ -17,7 +17,7 @@ __all__ = [
     'SearchHit',
     'SearchArguments',
     'SearchResult',
-    'ScreenedFile',
+    'FileStamp',
     'ScreenCandidate',
     'ScreeningStatus',
     'ScreeningResult',

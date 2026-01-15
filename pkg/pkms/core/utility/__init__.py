@@ -11,6 +11,29 @@ def get_file_content(file_path):
     content = file.read()
     return content
 
+def get_file_hash_sha256(file_path, chunk_size=4096):
+    """
+    Calculates the SHA256 hash of a file at the given path.
+    """
+    # Create a sha256 hash object
+    hash_sha256 = hashlib.sha256()
+    
+    # Open the file in binary read mode ('rb')
+    try:
+        with open(file_path, 'rb') as f:
+            # Read the file in chunks to be memory efficient for large files
+            for chunk in iter(lambda: f.read(chunk_size), b""):
+                hash_sha256.update(chunk)
+    except FileNotFoundError:
+        print(f"Error: File not found at {file_path}")
+        return None
+    except IOError as e:
+        print(f"Error reading file: {e}")
+        return None
+
+    # Return the hexadecimal representation of the digest
+    return hash_sha256.hexdigest()
+
 def get_content_hash_sha256_string(content):
     # TODO: Figure out if using text content cause potential error
     # TODO: MAYBE accept binary content

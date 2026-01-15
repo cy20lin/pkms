@@ -1,6 +1,9 @@
 from pkms.component.globber import PathspecGlobber
 from pkms.component.indexer import HtmlIndexer
 from pkms.component.upserter import Sqlite3Upserter
+from pkms.component.screener import SimpleScreener
+from pkms.core.model import ScreeningStatus
+
 import commentjson as json
 
 def ingest_html_collection(collection_path, db_path, dry_run):
@@ -10,11 +13,14 @@ def ingest_html_collection(collection_path, db_path, dry_run):
     )
     globber = PathspecGlobber(config=globber_config)
 
+    screener_config = SimpleScreener.Config()
+    screener = SimpleScreener(config=screener_config)
+
     html_indexer_config = HtmlIndexer.Config()
     html_indexer = HtmlIndexer(config=html_indexer_config)
 
     upserter_config = Sqlite3Upserter.Config(
-        db_path= db_path # 'spike-pkms.db'
+        db_path = db_path # e.g. 'spike-pkms.db'
     )
     upserter = Sqlite3Upserter(config=upserter_config)
 
@@ -27,13 +33,20 @@ def ingest_html_collection(collection_path, db_path, dry_run):
             if dry_run:
                 print(f'process index: {repr(file_location.path)}')
                 continue
-            indexed_document = html_indexer.index(file_location)
-            upserter.upsert(indexed_document)
-            print(f'success index: {repr(file_location.path)}, id: {indexed_document.file_id}')
-            documents.append(indexed_document)
+            screening_result = screener.screen([file_location])[0]
+            if screening_result.status == ScreeningStatus.APPROVED:
+                assert screening_result.file_stamp is not None
+                file_stamp = screening_result.file_stamp
+                indexed_document = html_indexer.index(file_location, file_stamp)
+                upserter.upsert(indexed_document)
+                print(f'success index: {repr(file_location.path)}, id: {indexed_document.file_id}')
+                documents.append(indexed_document)
+            else:
+                print(f'skipped index: {repr(file_location.path)}, reason: {screening_result.reason}')
         except Exception as e:
             print(f'skipped index: {repr(file_location.path)}, reason: {e}')
-            # print(e.with_traceback())
+            print(e.with_traceback())
+            break
 
 import argparse
 import sys

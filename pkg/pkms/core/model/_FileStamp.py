@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional, Dict, List, Literal, Any
 from pydantic import BaseModel, ConfigDict, Field
 
-class ScreenedFile(BaseModel):
+class FileStamp(BaseModel):
     """
     A file that has passed screening and
     is admitted into the indexing pipeline.

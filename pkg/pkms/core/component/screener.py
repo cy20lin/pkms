@@ -7,9 +7,8 @@ from .base import Component
 from ..model import ScreeningResult
 from ..model import ScreenCandidate
 
-class ScreenerConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    type: str = Field(..., discriminator="type")
+class ScreenerConfig(ComponentConfig):
+    pass
 
 class ScreenerRuntime(ComponentRuntime):
     pass
@@ -33,8 +32,7 @@ class Screener(Component):
 
 
     def __init__(self, *, config: ScreenerConfig, runtime: Optional[ScreenerRuntime] = None):
-        self.config = config
-        assert self.name == config.name
+        super().__init__(config=config, runtime=runtime)
 
     @abstractmethod
     def screen(

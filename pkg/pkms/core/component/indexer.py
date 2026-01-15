@@ -6,6 +6,7 @@ from .base import ComponentRuntime
 from .base import Component
 from ..model import FileLocation
 from ..model import IndexedDocument
+from ..model import FileStamp
 
 class IndexerConfig(ComponentConfig):
     model_config = ConfigDict(extra="allow", frozen=True)
@@ -21,5 +22,5 @@ class Indexer(Component):
         super().__init__(config=config, runtime=runtime)
 
     @abstractmethod
-    def index(self, file_location: FileLocation) -> IndexedDocument:
+    def index(self, file_location: FileLocation, file_stamp: FileStamp) -> IndexedDocument:
         ...
