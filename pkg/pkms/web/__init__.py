@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-
-import argparse
 from typing import Optional
+from dataclasses import dataclass
+import os
+import urllib
+import argparse
+import sqlite3
 
-from flask import Flask, request, jsonify, send_file
+from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi.responses import FileResponse, JSONResponse
+import uvicorn
 
 from pkms.core.component.searcher import (
     Searcher,
@@ -15,11 +20,6 @@ from pkms.core.model import (
     SearchResult,
 )
 from pkms.component.searcher import Sqlite3Searcher
-import os
-
-from dataclasses import dataclass
-import sqlite3
-import urllib
 
 # =========================
 # Models
@@ -129,50 +129,57 @@ def file_uri_to_path(uri: str) -> str:
 
 # ---------- App Factory ----------
 
-def create_app(searcher: Searcher, resolver: UriResolver) -> Flask:
-    app = Flask(__name__)
+def create_app(searcher: "Searcher", resolver: "UriResolver") -> FastAPI:
+    app = FastAPI(title="PKMS Search WebApp")
 
-    @app.route("/")
+    @app.get("/")
     def index():
-        return send_file(os.path.join(os.path.dirname(__file__), 'index.html'))
+        index_path = os.path.join(os.path.dirname(__file__), "index.html")
+        return FileResponse(index_path)
 
-    @app.route("/api/search", methods=["GET"])
-    def search():
-        query = request.args.get("q")
-        if not query:
-            return jsonify({"error": "missing query parameter 'q'"}), 400
-
-        limit = int(request.args.get("limit", 20))
-        offset = int(request.args.get("offset", 0))
-
+    @app.get("/api/search", response_model=None)
+    def search(
+        q: str = Query(..., description="Search query"),
+        limit: int = Query(20, ge=1),
+        offset: int = Query(0, ge=0),
+    ):
         args = SearchArguments(
-            query=query,
+            query=q,
             limit=limit,
             offset=offset,
         )
 
         result: SearchResult = searcher.search(args)
-        return jsonify(result.model_dump())
+        return result.model_dump()
 
-    @app.route("/api/view/<file_id>", methods=["GET"])
-    def view(file_id):
+    @app.get("/api/view/{file_id}")
+    def view(file_id: str):
         try:
             resolved = resolver.resolve(f"pkms://file/id/{file_id}")
             file_uri = resolved.file_uri
             file_path = file_uri_to_path(file_uri)
-            result = send_file(file_path)
-        except:
-        # except Exception as e:
-            result = f"{file_id} NOT FOUND"
-        return result
-            
+
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(file_path)
+
+            return FileResponse(file_path)
+
+        except Exception:
+            raise HTTPException(
+                status_code=404,
+                detail=f"{file_id} NOT FOUND",
+            )
+
     return app
 
 
 # ---------- Composition Root ----------
 
-def build_searcher(db_path: str) -> Searcher:
-    config = Sqlite3Searcher.Config(db_path=db_path, max_limit=100)
+def build_searcher(db_path: str) -> "Searcher":
+    config = Sqlite3Searcher.Config(
+        db_path=db_path,
+        max_limit=100,
+    )
     return Sqlite3Searcher(config=config)
 
 
@@ -180,7 +187,7 @@ def build_searcher(db_path: str) -> Searcher:
 
 def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="PKMS Search WebApp",
+        description="PKMS Search WebApp (FastAPI)",
     )
 
     parser.add_argument(
@@ -192,20 +199,20 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser.add_argument(
         "--host",
         default="127.0.0.1",
-        help="Flask bind host (default: 127.0.0.1)",
+        help="Bind host (default: 127.0.0.1)",
     )
 
     parser.add_argument(
         "--port",
         type=int,
         default=43472,
-        help="Flask bind port (default: 43472)",
+        help="Bind port (default: 43472)",
     )
 
     parser.add_argument(
-        "--debug",
+        "--reload",
         action="store_true",
-        help="Enable Flask debug mode",
+        help="Enable auto reload (dev only)",
     )
 
     return parser.parse_args(argv)
@@ -218,10 +225,11 @@ def main(argv: Optional[list[str]] = None) -> None:
     resolver = UriResolver(args.db_path)
     app = create_app(searcher, resolver)
 
-    app.run(
+    uvicorn.run(
+        app,
         host=args.host,
         port=args.port,
-        debug=args.debug,
+        reload=args.reload,
     )
 
 
