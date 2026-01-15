@@ -7,7 +7,7 @@ import argparse
 import sqlite3
 
 from fastapi import FastAPI, Depends, HTTPException, Query
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 import uvicorn
 
 from pkms.core.component.searcher import (
@@ -109,6 +109,15 @@ def create_app(searcher: "Searcher", resolver: "UriResolver") -> FastAPI:
                 status_code=404,
                 detail=f"{file_id} NOT FOUND",
             )
+
+    @app.get("/redirect")
+    def redirect(target: str = Query(..., description="Target URL to redirect to")):
+        if not target.startswith(("http://", "https://")):
+            raise HTTPException(
+                status_code=400,
+                detail="Target URL must start with http:// or https://",
+            )
+        return RedirectResponse(url=target, status_code=302)
 
     return app
 
