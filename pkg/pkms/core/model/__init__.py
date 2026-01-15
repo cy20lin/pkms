@@ -9,6 +9,7 @@ from ._FileStamp import FileStamp
 from ._ScreenCandidate import ScreenCandidate
 from ._ScreeningResult import ScreeningResult
 from ._ScreeningStatus import ScreeningStatus
+from ._ResolvedTarget import ResolvedTarget
 
 __all__ = [
     'FileLocation',
@@ -21,4 +22,5 @@ __all__ = [
     'ScreenCandidate',
     'ScreeningStatus',
     'ScreeningResult',
+    'ResolvedTarget'
 ]

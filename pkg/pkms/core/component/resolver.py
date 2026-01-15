@@ -4,8 +4,7 @@ from typing import Optional, Union, Dict, List, Literal
 from .base import ComponentConfig
 from .base import ComponentRuntime
 from .base import Component
-from ..model import ResolverInput
-from ..model import ResolverOutput
+from ..model import ResolvedTarget
 
 class ResolverConfig():
     model_config = ConfigDict(extra="allow", frozen=True)
@@ -21,5 +20,5 @@ class Resolver(Component):
         super().__init__(config=config, runtime=runtime)
 
     @abstractmethod
-    def resolve(self, input:ResolverInput) -> ResolverOutput:
+    def resolve(self, input: str) -> ResolvedTarget:
         ...

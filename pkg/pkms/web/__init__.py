@@ -26,7 +26,7 @@ from pkms.component.searcher import Sqlite3Searcher
 # =========================
 
 @dataclass
-class ResolvedTarget:
+class ResolvedTarget2:
     file_id: str
     file_uri: str
     file_kind: Optional[str]
@@ -37,68 +37,8 @@ class ResolvedTarget:
 # Resolver
 # =========================
 
-class UriResolver:
-    def __init__(self, db_path: str):
-        self.db_path = db_path
-
-    def resolve(self, uri: str) -> ResolvedTarget:
-
-
-        parsed = urllib.parse.urlparse(uri)
-
-        if parsed.scheme != "pkms":
-            raise ValueError(f"Unsupported URI scheme: {parsed.scheme}")
-
-        if parsed.netloc != "file":
-            raise ValueError(f"Unsupported PKMS authority: {parsed.netloc}")
-
-        path_parts = parsed.path.strip("/").split("/")
-
-        if not path_parts:
-            raise ValueError("Empty PKMS resource path")
-
-        # pkms://file/<file_id>
-        if len(path_parts) == 1:
-            return self._resolve_by_file_id(path_parts[0])
-
-        # pkms://file//<file_id>
-        if len(path_parts) == 2 and path_parts[0] == "":
-            return self._resolve_by_file_id(path_parts[1])
-
-        # pkms://file/id/<file_id>
-        if len(path_parts) == 2 and path_parts[0] == "id":
-            return self._resolve_by_file_id(path_parts[1])
-
-        raise ValueError(f"Unsupported PKMS resource path: {parsed.path}")
-
-    def _resolve_by_file_id(self, file_id: str) -> ResolvedTarget:
-        self._conn = sqlite3.connect(self.db_path)
-        self._conn.row_factory = sqlite3.Row
-        result = None
-        try:
-            row = self._conn.execute(
-                """
-                SELECT file_id, file_uri, file_kind, title
-                FROM files
-                WHERE file_id = ?
-                """,
-                (file_id,),
-            ).fetchone()
-
-            if not row:
-                raise LookupError(f"file_id not found: {file_id}")
-
-            result = ResolvedTarget(
-                file_id=row["file_id"],
-                file_uri=row["file_uri"],
-                file_kind=row["file_kind"],
-                title=row["title"],
-            )
-        finally:
-            self._conn.close()
-            self._conn = None
-
-        return result
+from pkms.component.resolver import UriResolver
+from pkms.core.model import ResolvedTarget
 
 # File uri to path
 import urllib.parse
@@ -155,7 +95,7 @@ def create_app(searcher: "Searcher", resolver: "UriResolver") -> FastAPI:
     @app.get("/api/view/{file_id}")
     def view(file_id: str):
         try:
-            resolved = resolver.resolve(f"pkms://file/id/{file_id}")
+            resolved = resolver.resolve(f"pkms:///file/id:{file_id}")
             file_uri = resolved.file_uri
             file_path = file_uri_to_path(file_uri)
 

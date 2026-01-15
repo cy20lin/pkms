@@ -131,6 +131,7 @@ def wrap_text_search_query(query: str) -> str:
 SEARCH_SQL = """
 SELECT
     files.file_id,
+    files.file_extension,
     files.title,
     files.file_uri,
     files.origin_uri,
@@ -182,7 +183,7 @@ class Sqlite3Searcher(Searcher):
         for row in cur.fetchall():
             hits.append(
                 SearchHit(
-                    file_id=row["file_id"],
+                    file_id=row["file_id"]+row["file_extension"],
                     title=row["title"],
                     file_uri=row["file_uri"],
                     origin_uri=row["origin_uri"],

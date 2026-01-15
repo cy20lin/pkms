@@ -77,7 +77,7 @@ def parse_file_name(file_path: str | pathlib.Path):
     name = p.name
     pattern = r"^([\S]*)\s+(!*)\s*(?:([^\{.]*))(?:{([^}]*)})?[\s\S]*?((:?\.[_a-zA-Z0-9]*)*)$"
     # pattern = r"^([\S]*)\s+(!*)\s*(?:([^\{.]*))(?:{([^}]*)})?[^.]*(.*)$"
-    # file_id_prefix: ^([\S]*)
+    # id: ^([\S]*)
     # space: \s+
     # importance optional: (!*)
     # space: \s*
@@ -87,16 +87,15 @@ def parse_file_name(file_path: str | pathlib.Path):
     # extension: (.*)$ , rest items
     m = re.match(pattern,name)
     if m is not None:
-        file_id_prefix = m.group(1)
+        id = m.group(1)
         importance = m.group(2)
         title = m.group(3)
         context = m.group(4)
         extension = m.group(5)
-        file_id = file_id_prefix + extension
+        # file_id = file_id_prefix + extension
         result = {
             "name": name,
-            "id_prefix": file_id_prefix,
-            "id": file_id,
+            "id": id,
             "importance": len(importance),
             "title": title,
             "context": context,
