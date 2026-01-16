@@ -1,0 +1,10 @@
+{
+    "name": "odt_to_html",
+    "description": "ODT to HTML Converter",
+    "repo": "git@github.com:cy20lin/odt_to_html.git",
+    "commit": "970548171bfab0014d6359157108ca09691634a9",
+    "tag": "v0.5.1",
+    "files": [
+        {"from":"odt_to_html.py", "to":"odt_to_html.py", "size":128199, "sha256":"53c68b78649e91c7b5009e1a346ec70af39c119c83e141ed2046f85039c46b16"}
+    ]
+}

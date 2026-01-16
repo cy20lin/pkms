@@ -1,0 +1,10 @@
+{
+    "name": "markdown_to_html",
+    "description": "Markdown to HTML Converter",
+    "repo": "git@github.com:cy20lin/markdown_to_html.git",
+    "commit": "8fd2e67d76ac0a8483e18acd51da18e736056dcc",
+    "tag": "v0.2.0",
+    "files": [
+        {"from":"markdown_to_html.py", "to":"markdown_to_html.py", "size":19869, "sha256":"27c979af88416d58835b6082ebd7582d33b6e07231b251516fcef66b214acc99"}
+    ]
+}

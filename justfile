@@ -42,3 +42,7 @@ tree:
 
 tree-dir:
     tree -d --gitignore
+
+libinfo-verify:
+    python ./script/verify_libinfo.py ./pkg/pkms/lib/markdown_to_html/libinfo.jsonc
+    python ./script/verify_libinfo.py ./pkg/pkms/lib/odt_to_html/libinfo.jsonc
