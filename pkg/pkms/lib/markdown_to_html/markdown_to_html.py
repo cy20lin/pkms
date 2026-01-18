@@ -34,10 +34,14 @@ class MarkdownToHtmlConverterConfig(pydantic.BaseModel):
 class MarkdownToHtmlConverterRuntime():
     md: MarkdownIt
     
-    def __init__(self, config: Optional[MarkdownToHtmlConverterConfig] = None, **data):
-        if config is not None and "md" not in data:
-            data["md"] = create_md_parser(config.redirect_base)
-        super().__init__(**data)
+    def __init__(self, config: Optional[MarkdownToHtmlConverterConfig] = None, **kwargs):
+        if "md" not in kwargs:
+            self.md = create_md_parser(
+                redirect_base=config.redirect_base if config is not None else None
+            )
+        else:
+            assert isinstance(kwargs['md'], MarkdownIt)
+            self.md = kwargs['md']
 
     def shutdown(self):
         pass
