@@ -57,3 +57,6 @@ components-verify:
     python ./script/verify_component_init.py pkg/pkms/component/resolver
     python ./script/verify_component_init.py pkg/pkms/component/searcher
     python ./script/verify_component_init.py pkg/pkms/component/upserter
+
+git-history:
+    git --no-pager log --pretty=format:"%ad -- %s" --date=short
