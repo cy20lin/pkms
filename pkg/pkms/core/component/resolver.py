@@ -6,7 +6,7 @@ from .base import ComponentRuntime
 from .base import Component
 from ..model import ResolvedTarget
 
-class ResolverConfig():
+class ResolverConfig(ComponentConfig):
     model_config = ConfigDict(extra="allow", frozen=True)
 
 class ResolverRuntime(ComponentRuntime):
