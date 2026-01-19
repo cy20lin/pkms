@@ -22,3 +22,4 @@ __LEGACY/
 **/*.db
 **/*.db-shm
 **/*.db-wal
+!/test/collections/**/*
