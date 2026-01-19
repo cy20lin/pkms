@@ -175,6 +175,7 @@ from contextlib import contextmanager
 
 class Sqlite3UpserterConfig(UpserterConfig):
     type: Literal['Sqlite3UpserterConfig'] = 'Sqlite3UpserterConfig'
+    db_path: str
 
 class Sqlite3UpserterRuntime(UpserterRuntime):
     pass
