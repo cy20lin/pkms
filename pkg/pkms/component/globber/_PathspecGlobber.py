@@ -14,7 +14,7 @@ def _try_append_slash(path:str):
     return path+'/' if not path.endswith('/') else path
 
 class PathspecGlobberConfig(GlobberConfig):
-    type: Literal['PathspecGlobblerConfig'] = 'PathspecGlobberConfig'
+    type: Literal['PathspecGlobberConfig'] = 'PathspecGlobberConfig'
 
 class PathspecGlobberRuntime(GlobberRuntime):
     pass
