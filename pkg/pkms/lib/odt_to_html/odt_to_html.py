@@ -12,18 +12,18 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --show-page-breaks [SHOW_PAGE_BREAKS]
-                        Show page break character in output HTML (default: False)
+                        Show page break character in output HTML
   --title TITLE         Specify the title explicitly
   --title-from-metadata [TITLE_FROM_METADATA]
-                        Extract title from ODT metadata (default: True). Use --title-from-metadata=0 to disable.
+                        Extract title from ODT metadata
   --title-from-styled-title [TITLE_FROM_STYLED_TITLE]
-                        Extract title from first "Title" styled paragraph (default: True). Use --title-from-styled-title=0 to disable.
+                        Extract title from first "Title" styled paragraph
   --title-from-h1 [TITLE_FROM_H1]
-                        Extract title from first Heading 1 (default: True). Use --title-from-h1=0 to disable.
+                        Extract title from first Heading 1
   --title-fallback TITLE_FALLBACK
                         Fallback title if no other title found
   --title-from-filename [TITLE_FROM_FILENAME]
-                        Use filename as title if no other title found (default: False). Use --title-from-filename=1 to enable.
+                        Use filename as title if no other title found
 
 Examples:
     python odt_to_html.py document.odt output.html
@@ -398,13 +398,13 @@ class TextDecoration(BaseModel):
 import pydantic
 
 class OdtToHtmlConverterConfig(pydantic.BaseModel):
-    model_config = pydantic.ConfigDict(extra="forbid", frozen=False)
-    show_page_breaks: bool
+    model_config = pydantic.ConfigDict(extra="ignore", frozen=False)
+    show_page_breaks: bool = False
     title: Optional[str] = None
-    title_from_metadata: bool
-    title_from_styled_title: bool
-    title_from_h1: bool
-    title_from_filename: bool
+    title_from_metadata: bool = True
+    title_from_styled_title: bool = True
+    title_from_h1: bool = True
+    title_from_filename: bool = True
     title_fallback: Optional[str] = None
 
 class OdtToHtmlConverterRuntime(pydantic.BaseModel):
@@ -448,9 +448,9 @@ class OdtToHtmlConverter:
         self.use_styled_title = config.title_from_styled_title
         self.use_h1_title = config.title_from_h1
         self.use_filename_title = config.title_from_filename
-        self.fallback_title = config.title_fallback
+        self.title_fallback = config.title_fallback
 
-    def convert(self, file: Union[StrPath,bytes,IO[bytes]], title: Optional[str]) -> str:
+    def convert(self, file: Union[StrPath,bytes,IO[bytes]], title: Optional[str]=None, title_fallback: Optional[str]=None, filename: Optional[StrPath]=None) -> str:
         """Convert the ODT file to HTML string."""
 
         # Normalize input
@@ -484,7 +484,8 @@ class OdtToHtmlConverter:
                 html_body += self._generate_footnotes_section()
         
             # Determine title
-            doc_title = self._determine_title(odt_zip, content_xml, title)
+            filename = file if isinstance(file, (str, Path)) else filename
+            doc_title = self._determine_title(odt_zip, content_xml, title=title, title_fallback=title_fallback, filename=filename)
         
         return self._wrap_html(html_body, doc_title)
 
@@ -1004,15 +1005,13 @@ class OdtToHtmlConverter:
                 
         return False
 
-    def _determine_title(self, odt_zip: zipfile.ZipFile, content_xml: str, title: Optional[str]) -> str:
+    def _determine_title(self, odt_zip: zipfile.ZipFile, content_xml: str, title: Optional[str], title_fallback: Optional[str], filename: Optional[StrPath]=None) -> str:
         """Determine the document title based on precedence rules."""
 
-        # 0. User Argument from current call
+        # 1. User Specified title
         if title:
             return title
-
-        # 1. User Argument from config
-        if self.overridden_title:
+        elif self.overridden_title:
             return self.overridden_title
             
         # 2. Metadata
@@ -1033,14 +1032,18 @@ class OdtToHtmlConverter:
         # 4. Heading 1
         if self.use_h1_title and candidates and candidates['h1_title']:
             return candidates['h1_title']
-            
-        # 5. Fallback Argument
-        if self.fallback_title:
-            return self.fallback_title
-            
+
+        # 5. Fallback
+        if title_fallback:
+            return title_fallback
+        elif self.title_fallback:
+            return self.title_fallback
+        
         # 6. Filename
-        if self.use_filename_title:
-            return self.odt_path.stem
+        # strip extension and parent path
+        filename_title = Path(filename).stem if filename else None
+        if self.use_filename_title and filename_title:
+            return filename_title
             
         # 7. None / Default
         return ""
@@ -2918,6 +2921,7 @@ class OdtToHtmlConverter:
         return result
 
 def main():
+    default_config = OdtToHtmlConverterConfig()
     parser = argparse.ArgumentParser(
         description='Convert ODT files to standalone HTML with embedded resources.',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -2930,22 +2934,19 @@ Examples:
     )
     parser.add_argument('input', help='Path to the input ODT file')
     parser.add_argument('output', help='Path for the output HTML file')
-    parser.add_argument('--show-page-breaks', nargs='?', const=True, default=False, type=str_to_bool,
-                        help='Show page break character in output HTML (default: False)')
-                        
+    parser.add_argument('--show-page-breaks', nargs='?', const=True, default=default_config.show_page_breaks, type=str_to_bool,
+                        help=f'Show page break character in output HTML (default: {default_config.show_page_breaks})')
     # Title extraction arguments
-    parser.add_argument('--title', help='Specify the title explicitly', default=None)
-    
-    # Feature flags for title extraction
-    parser.add_argument('--title-from-metadata', nargs='?', const=True, default=True, type=str_to_bool,
-                        help='Extract title from ODT metadata (default: True). Use --title-from-metadata=0 to disable.')
-    parser.add_argument('--title-from-styled-title', nargs='?', const=True, default=True, type=str_to_bool,
-                        help='Extract title from first "Title" styled paragraph (default: True). Use --title-from-styled-title=0 to disable.')
-    parser.add_argument('--title-from-h1', nargs='?', const=True, default=True, type=str_to_bool,
-                        help='Extract title from first Heading 1 (default: True). Use --title-from-h1=0 to disable.')
-    parser.add_argument('--title-fallback', help='Fallback title if no other title found', default=None)
-    parser.add_argument('--title-from-filename', nargs='?', const=True, default=False, type=str_to_bool,
-                        help='Use filename as title if no other title found (default: False). Use --title-from-filename=1 to enable.')
+    parser.add_argument('--title', help='Specify the title explicitly', default=default_config.title)
+    parser.add_argument('--title-from-metadata', nargs='?', const=True, default=default_config.title_from_metadata, type=str_to_bool,
+                        help=f'Extract title from ODT metadata (bool, default: {default_config.title_from_metadata}). Use --title-from-metadata=0 to disable.')
+    parser.add_argument('--title-from-styled-title', nargs='?', const=True, default=default_config.title_from_styled_title, type=str_to_bool,
+                        help=f'Extract title from first "Title" styled paragraph (bool, default:{default_config.title_from_styled_title}). Use --title-from-styled-title=0 to disable.')
+    parser.add_argument('--title-from-h1', nargs='?', const=True, default=default_config.title_from_h1, type=str_to_bool,
+                        help=f'Extract title from first Heading 1 (bool, default: {default_config.title_from_h1}). Use --title-from-h1=0 to disable.')
+    parser.add_argument('--title-fallback', help='Fallback title if no other title found', default=default_config.title_fallback)
+    parser.add_argument('--title-from-filename', nargs='?', const=True, default=default_config.title_from_filename, type=str_to_bool,
+                        help=f'Use filename as title if no other title found (bool, default: {default_config.title_from_filename}).  Use --title-from-filename=0 to disable.')
     
     args = parser.parse_args()
     

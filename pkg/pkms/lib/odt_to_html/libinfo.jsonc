@@ -2,9 +2,14 @@
     "name": "odt_to_html",
     "description": "ODT to HTML Converter",
     "repo": "git@github.com:cy20lin/odt_to_html.git",
-    "commit": "970548171bfab0014d6359157108ca09691634a9",
-    "tag": "v0.5.1",
+    "commit": "780bf82ca826253d0507d8c8ba0e3df501e62a75",
+    "tag": "v0.5.2",
     "files": [
-        {"from":"odt_to_html.py", "to":"odt_to_html.py", "size":128199, "sha256":"53c68b78649e91c7b5009e1a346ec70af39c119c83e141ed2046f85039c46b16"}
+        {
+            "from": "odt_to_html.py",
+            "to": "odt_to_html.py",
+            "size": 128720,
+            "sha256": "b98a41ccad7649d5b4c37fd90eb0b853031b2c3e20384cf5dd3315f3843bb37b"
+        }
     ]
 }
