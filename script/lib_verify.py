@@ -55,18 +55,24 @@ def verify_libinfo(libinfo_path: Path) -> None:
         print(f"Checking: {file_path}")
 
         if not file_path.exists():
-            print(f"  ❌ MISSING")
+            print(f"  ❌ MISSING file")
             errors += 1
             continue
 
         actual_size = file_path.stat().st_size
-        if expected_size is not None and actual_size != expected_size:
+        if expected_size is None: 
+            print("  ❌ MISSING size")
+            errors += 1
+        elif actual_size != expected_size:
             print(f"  ❌ SIZE mismatch: expected {expected_size}, got {actual_size}")
             errors += 1
         else:
             print(f"  ✅ size OK")
 
-        if expected_sha256:
+        if expected_sha256 is None: 
+            print("  ❌ MISSING sha256")
+            errors += 1
+        else:
             actual_sha256 = sha256_of_file(file_path)
             if actual_sha256.lower() != expected_sha256.lower():
                 print(f"  ❌ SHA256 mismatch")

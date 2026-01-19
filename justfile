@@ -43,6 +43,17 @@ tree:
 tree-dir:
     tree -d --gitignore
 
-libinfo-verify:
-    python ./script/verify_libinfo.py ./pkg/pkms/lib/markdown_to_html/libinfo.jsonc
-    python ./script/verify_libinfo.py ./pkg/pkms/lib/odt_to_html/libinfo.jsonc
+lib-verify:
+    python ./script/lib_verify.py ./pkg/pkms/lib/markdown_to_html/libinfo.jsonc
+    python ./script/lib_verify.py ./pkg/pkms/lib/odt_to_html/libinfo.jsonc
+
+lib-sync:
+    python ./script/lib_sync.py ./pkg/pkms/lib/markdown_to_html/libinfo.jsonc
+    python ./script/lib_sync.py ./pkg/pkms/lib/odt_to_html/libinfo.jsonc
+
+components-verify:
+    python ./script/verify_component_init.py pkg/pkms/component/globber
+    python ./script/verify_component_init.py pkg/pkms/component/indexer
+    python ./script/verify_component_init.py pkg/pkms/component/resolver
+    python ./script/verify_component_init.py pkg/pkms/component/searcher
+    python ./script/verify_component_init.py pkg/pkms/component/upserter
