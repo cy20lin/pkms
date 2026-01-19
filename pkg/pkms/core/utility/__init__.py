@@ -6,6 +6,18 @@ from ._sql import (
     assert_sql_model_aligned
 )
 
+def str_to_bool(s: str):
+    if s.isupper():
+        ss = s.lower()
+    else:
+        ss = s[0].lower() + s[1:]
+    if ss in ('1','y','t','yes','true','on'):
+        return True
+    elif ss in ('0','n','f','no','false','off'):
+        return False
+    else:
+        raise RuntimeError('Boolean value expected.')
+
 def get_file_content(file_path):
     file = open(file_path, "r", encoding='utf-8')
     content = file.read()
