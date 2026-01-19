@@ -13,15 +13,19 @@ from pkms.core.model import (
 )
 
 
-class UriResolverRuntime(ResolverConfig):
+class UriResolverRuntime(ResolverRuntime):
     pass
 
 class UriResolverConfig(ResolverConfig):
     type: Literal['UriResolverConfig'] = 'UriResolverConfig'
+    db_path: str
 
 class UriResolver(Resolver):
-    def __init__(self, db_path: str):
-        self.db_path = db_path
+    Config = UriResolverConfig
+    Runtime = UriResolverRuntime
+
+    def __init__(self, config: UriResolverConfig, runtime: Optional[UriResolverRuntime] = None):
+        super().__init__(config=config, runtime=runtime)
 
     def resolve(self, uri: str) -> ResolvedTarget:
         parsed = urllib.parse.urlparse(uri)
@@ -72,7 +76,7 @@ class UriResolver(Resolver):
         value: str,
         ext: str,
     ) -> ResolvedTarget:
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.config.db_path)
         conn.row_factory = sqlite3.Row
 
         try:
