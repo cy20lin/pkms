@@ -172,6 +172,11 @@ def create_app(searcher: "Searcher", resolver: "UriResolver", representer: HtmlR
                 detail="Target URL must start with http:// or https://",
             )
         return RedirectResponse(url=target, status_code=302)
+    # Handle favicon.ico requests gracefully
+    @app.get("/favicon.png", include_in_schema=False)
+    def favicon():
+        # Direct serving from the mounted static directory
+        return FileResponse(f"{os.path.dirname(__file__)}/favicon-20260118_115236-64x64-wcbg.ico")
 
     return app
 
