@@ -65,3 +65,9 @@
 
 - for profiling
   - pyinstrument
+
+- for source code investigation
+  - https://deepwiki.com/
+
+- for container base image
+  - Alpine Linux: a lightweight base image os choice
