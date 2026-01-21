@@ -1,6 +1,10 @@
 from enum import Enum
 
 class ScreeningStatus(str, Enum):
-    APPROVED = "APPROVED"
+    # safe to ingest automatically
+    APPROVED = "APPROVED" 
+    # must not ingest
     REJECTED = "REJECTED"
-    PENDING = "PENDING"
+    # human decision required
+    # decision escalation
+    ESCALATED = "ESCALATED"
