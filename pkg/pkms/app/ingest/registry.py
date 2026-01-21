@@ -1,5 +1,5 @@
-from ..component import ComponentConfigUnion
-from ..core.component import Component
+from pkms.component import ComponentConfigUnion
+from pkms.core.component import Component
 
 ComponentRegistryConfig = dict[str,ComponentConfigUnion]
 ComponentRegistry = dict[str,Component]

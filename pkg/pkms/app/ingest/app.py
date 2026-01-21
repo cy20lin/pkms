@@ -11,19 +11,19 @@ from pkms.component.upserter import Sqlite3Upserter
 from pkms.component.resolver import UriResolver
 from pkms.component.searcher import Sqlite3Searcher
 
-from pkms.ingest.registry import (
+from .registry import (
     ComponentRegistry,
     ComponentRegistryConfig,
 )
-from pkms.ingest.collection import (
+from .collection import (
     ComponentsConfig,
     CollectionComponents,
     CollectionConfig,
     CollectionRuntime,
     Collection,
 )
-from ..core.component import Component, ComponentConfig, ComponentRuntime
-from ..component import ComponentConfigUnion
+from pkms.core.component import Component, ComponentConfig, ComponentRuntime
+from pkms.component import ComponentConfigUnion
 
 class AppConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
