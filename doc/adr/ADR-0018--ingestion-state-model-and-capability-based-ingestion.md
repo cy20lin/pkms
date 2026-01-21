@@ -103,7 +103,7 @@ collection/
 ├── _INBOX/
 │   └── note.odt
 ├── _REJECTED/
-├── _PENDING/
+├── _ESCALATED/
 ```
 
 Placing a file into `_INBOX/` indicates:
@@ -152,12 +152,16 @@ Editing requires additional checks beyond addressing.
 
 ### Resolver Outcomes
 
-| Situation | Resolver Result |
-| --- | --- |
-| Identity known, file missing | Historical record returned |
-| Identity unknown | Not found |
-| Identity known, integrity mismatch | Conflict / revision |
-| Identity known, ingestion pending | Partial resolution |
+| Situation                          | Resolver Result            |
+| ---                                | ---                        |
+| Identity known, file missing       | Historical record returned |
+| Identity unknown                   | Not found                  |
+| Identity known, integrity mismatch | Conflict / revision        |
+| Identity known, ingestion pending  | Partial resolution         |
+
+> NOTE:
+> The resolver result here is for example use,
+> the wording may not be percise and still needs further refinements.
 
 Failures are **explicit states**, not silent errors.
 
