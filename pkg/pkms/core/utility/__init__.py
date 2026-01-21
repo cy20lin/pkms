@@ -5,6 +5,7 @@ from ._sql import (
     extract_sql_params,
     assert_sql_model_aligned
 )
+from ._CommandParser import CommandParser
 
 def str_to_bool(s: str):
     if s.isupper():
