@@ -6,6 +6,7 @@ import urllib
 import argparse
 import sqlite3
 import pathlib
+import traceback 
 
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, HTMLResponse
@@ -142,26 +143,27 @@ def create_app(searcher: "Searcher", resolver: "UriResolver", representer: HtmlR
         result: SearchResult = searcher.search(args)
         return result.model_dump()
 
-    @app.get("/api/view/{file_id}")
-    def view(file_id: str):
+    @app.get("/api/view/{id}")
+    def view(id: str):
         try:
-            resolved = resolver.resolve(f"pkms:///file/id:{file_id}")
-            file_uri = resolved.file_uri
-            file_path = file_uri_to_path(file_uri)
+            resolved = resolver.resolve(f"pkms:///file/id:{id}")
+            file_path = resolved.file_location.fs_path
+            # print(file_path, flush=True)
 
             if not os.path.exists(file_path):
                 raise FileNotFoundError(file_path)
             
-            if file_id.endswith('.html'):
+            if resolved.file_extension == '.html':
                 return FileResponse(file_path)
             else:
                 representation: str = representer.represent(file_path)
                 return HTMLResponse(representation)
 
-        except Exception:
+        except Exception as e:
+            reason=''.join(traceback.format_exception(None, e, e.__traceback__))
             raise HTTPException(
                 status_code=404,
-                detail=f"{file_id} NOT FOUND",
+                detail=f"id:{id} NOT FOUND, reason={reason!r}",
             )
 
     @app.get("/redirect")

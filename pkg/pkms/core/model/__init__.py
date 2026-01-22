@@ -10,6 +10,8 @@ from ._ScreenCandidate import ScreenCandidate
 from ._ScreeningResult import ScreeningResult
 from ._ScreeningStatus import ScreeningStatus
 from ._ResolvedTarget import ResolvedTarget
+from ._ResolutionStatus import ResolutionStatus
+from ._FileType import FileType
 
 __all__ = [
     'FileLocation',
@@ -22,5 +24,7 @@ __all__ = [
     'ScreenCandidate',
     'ScreeningStatus',
     'ScreeningResult',
-    'ResolvedTarget'
+    'ResolvedTarget',
+    'ResolutionStatus',
+    'FileType'
 ]

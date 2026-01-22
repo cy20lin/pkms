@@ -33,12 +33,7 @@ class PathspecGlobber(Globber):
         base_path_posix = _try_append_slash(base_path_.absolute().as_posix())
         sub_paths = self._pathspec.match_tree_files(root=base_path_posix, negate=self.config.negate)
         result = [ 
-            FileLocation(
-                scheme='file',
-                authority='',
-                base_path=base_path_posix,
-                sub_path=sub_path.replace('\\', '/')
-            ) 
+            FileLocation.from_fs_path(sub_path, base_path=base_path)
             for sub_path in sub_paths 
         ]
         return result

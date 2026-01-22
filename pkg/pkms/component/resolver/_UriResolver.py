@@ -9,7 +9,10 @@ from pkms.core.component.resolver import (
     ResolverRuntime,
 )
 from pkms.core.model import (
-    ResolvedTarget
+    ResolvedTarget,
+    ResolutionStatus,
+    FileLocation,
+    FileType,
 )
 
 
@@ -30,7 +33,7 @@ class UriResolver(Resolver):
     def resolve(self, uri: str) -> ResolvedTarget:
         parsed = urllib.parse.urlparse(uri)
 
-        print(f'parsed: {parsed}',flush=True)
+        # print(f'parsed: {parsed}',flush=True)
         # 1. scheme
         if parsed.scheme != "pkms":
             raise ValueError(f"Unsupported URI scheme: {parsed.scheme}")
@@ -83,18 +86,18 @@ class UriResolver(Resolver):
             if selector == "id":
                 row = conn.execute(
                     """
-                    SELECT file_id, file_uri, file_kind, title
+                    SELECT file_id, file_uri, file_kind, title, file_extension
                     FROM files
                     WHERE file_id = ? AND file_extension = ?
                     """,
                     (value, ext),
                 ).fetchone()
-                print(row,flush=True)
+                # print(row,flush=True)
 
             elif selector == "uid":
                 row = conn.execute(
                     """
-                    SELECT file_id, file_uri, file_kind, title
+                    SELECT file_id, file_uri, file_kind, title, file_extension
                     FROM files
                     WHERE file_uid = ?
                     """,
@@ -103,7 +106,7 @@ class UriResolver(Resolver):
             elif selector == "sha256":
                 row = conn.execute(
                     """
-                    SELECT file_id, file_uri, file_kind, title
+                    SELECT file_id, file_uri, file_kind, title, file_extension
                     FROM files
                     WHERE file_hash_sha256 = ?
                     """,
@@ -114,12 +117,14 @@ class UriResolver(Resolver):
 
             if not row:
                 raise LookupError(f"Resource not found for {selector}:{value}")
-
             return ResolvedTarget(
+                status=ResolutionStatus.OK,
                 file_id=row["file_id"],
-                file_uri=row["file_uri"],
+                file_extension=row['file_extension'],
                 file_kind=row["file_kind"],
                 title=row["title"],
+                file_location=FileLocation.from_uri(row['file_uri']),
+                file_type=FileType.REGULAR,
             )
 
         finally:
