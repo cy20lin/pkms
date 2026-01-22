@@ -9,6 +9,7 @@ class SearchHit(BaseModel):
     model_config = ConfigDict(extra="allow", frozen=True)
 
     file_id: str
+    file_extension: str
     title: str
 
     file_uri: Optional[str] = None

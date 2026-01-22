@@ -14,27 +14,42 @@ from pkms.core.model import (
 
 # ---------- Test DB Setup ----------
 
-SCHEMA_SQL = """
-CREATE TABLE files (
-    id INTEGER PRIMARY KEY,
-    file_id TEXT NOT NULL UNIQUE,
-    title TEXT NOT NULL,
-    file_uri TEXT,
-    origin_uri TEXT,
-    text TEXT
-);
+from pkms.component.upserter._Sqlite3Upserter import SCHEMA_SQL
+# SCHEMA_SQL = """
+# CREATE TABLE files (
+#     id INTEGER PRIMARY KEY,
+#     file_id TEXT NOT NULL UNIQUE,
+#     title TEXT NOT NULL,
+#     file_uri TEXT,
+#     origin_uri TEXT,
+#     text TEXT
+# );
 
-CREATE VIRTUAL TABLE files_fts USING fts5(
-    title,
-    text,
-    content='files',
-    content_rowid='id'
-);
-"""
+# CREATE VIRTUAL TABLE files_fts USING fts5(
+#     title,
+#     text,
+#     content='files',
+#     content_rowid='id'
+# );
+# """
 
 INSERT_FILE_SQL = """
-INSERT INTO files (file_id, title, file_uri, origin_uri, text)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO files (
+    file_id, 
+    title, 
+    file_uri, 
+    origin_uri, 
+    text, 
+    file_size, 
+    file_hash_sha256, 
+    file_extension, 
+    file_kind,
+    record_created_datetime,
+    record_updated_datetime,
+    file_created_datetime,
+    file_modified_datetime
+) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 """
 
 INSERT_FTS_SQL = """
@@ -58,10 +73,18 @@ def sqlite_db(tmp_path):
     rows = [
         (
             "2025-01-01-0001",
-            "Google Search",
-            "file:///google.html",
-            "https://google.com",
-            "Google is a search engine",
+            "Example Domain",
+            "file:///example.html",
+            "https://example.com",
+            "Example.com is a cool website",
+            1000,
+            '0000000000000000000000000000000000000000000000000000000000000000',
+            '.html',
+            'snapshot',
+            '2000-01-01T01:01:01.000000+00:00',
+            '2000-01-01T01:01:01.000000+00:00',
+            '2000-01-01T01:01:01.000000+00:00',
+            '2000-01-01T01:01:01.000000+00:00',
         ),
         (
             "2025-01-01-0002",
@@ -69,6 +92,14 @@ def sqlite_db(tmp_path):
             "file:///sqlite.html",
             None,
             "SQLite provides full text search using FTS5",
+            1001,
+            '1111111111111111111111111111111111111111111111111111111111111111',
+            '.html',
+            'snapshot',
+            '2000-01-01T01:01:01.000000+00:00',
+            '2000-01-01T01:01:01.000000+00:00',
+            '2000-01-01T01:01:01.000000+00:00',
+            '2000-01-01T01:01:01.000000+00:00',
         ),
         (
             "2025-01-01-0003",
@@ -76,6 +107,14 @@ def sqlite_db(tmp_path):
             "file:///python.html",
             None,
             "Python is a programming language",
+            1002,
+            '2222222222222222222222222222222222222222222222222222222222222222',
+            '.html',
+            'snapshot',
+            '2000-01-01T01:01:01.000000+00:00',
+            '2000-01-01T01:01:01.000000+00:00',
+            '2000-01-01T01:01:01.000000+00:00',
+            '2000-01-01T01:01:01.000000+00:00',
         ),
     ]
 
@@ -134,13 +173,14 @@ def test_search_returns_expected_fields(searcher):
 
     This test validates the structural integrity of SearchHit.
     """
-    args = SearchArguments(query="Google")
+    args = SearchArguments(query="Example")
     results = searcher.search(args)
 
     hit = results.hits[0]
 
     assert hit.file_id == "2025-01-01-0001"
-    assert hit.title == "Google Search"
+    assert hit.file_extension == ".html"
+    assert hit.title == "Example Domain"
     assert hit.file_uri is not None
     assert hit.score is not None
 

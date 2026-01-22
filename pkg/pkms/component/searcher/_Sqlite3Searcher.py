@@ -183,7 +183,8 @@ class Sqlite3Searcher(Searcher):
         for row in cur.fetchall():
             hits.append(
                 SearchHit(
-                    file_id=row["file_id"]+row["file_extension"],
+                    file_id=row["file_id"],
+                    file_extension=row["file_extension"],
                     title=row["title"],
                     file_uri=row["file_uri"],
                     origin_uri=row["origin_uri"],
