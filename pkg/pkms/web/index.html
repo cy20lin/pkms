@@ -141,10 +141,10 @@
 
       div.innerHTML = `
         <div class="result-title">
-          <a href="/api/view/${r.file_id}">${r.title}</a>
+          <a href="/api/view/${r.file_id}${r.file_extension}">${r.title}</a>
         </div>
         ${r.snippet ? `<div class="result-snippet">${r.snippet}</div>` : ""}
-        <div class="result-meta">file_id: ${r.file_id}</div>
+        <div class="result-meta">pkms:///file/id:${r.file_id}${r.file_extension}</div>
       `;
 
       container.appendChild(div);
