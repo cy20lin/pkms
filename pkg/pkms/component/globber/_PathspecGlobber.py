@@ -30,10 +30,11 @@ class PathspecGlobber(Globber):
     
     def glob(self, base_path:str) -> FileLocation:
         base_path_ = pathlib.Path(base_path, '')
-        base_path_posix = _try_append_slash(base_path_.absolute().as_posix())
-        sub_paths = self._pathspec.match_tree_files(root=base_path_posix, negate=self.config.negate)
+        base_path_str = _try_append_slash(base_path_.absolute().as_posix())
+        sub_paths = self._pathspec.match_tree_files(root=base_path_str, negate=self.config.negate)
+        path_convention = 'windows' if isinstance(base_path_, pathlib.WindowsPath) else 'posix'
         result = [ 
-            FileLocation.from_fs_path(sub_path, base_path=base_path)
+            FileLocation.from_filesystem_path(sub_path, base_path=base_path_str, path_convention=path_convention)
             for sub_path in sub_paths 
         ]
         return result

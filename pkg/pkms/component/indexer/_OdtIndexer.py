@@ -43,10 +43,9 @@ class OdtIndexer(Indexer):
     def index(self, file_location: FileLocation, file_stamp: FileStamp) -> IndexedDocument:
         assert file_location.scheme == 'file'
         assert file_location.authority == ''
-        assert os.path.isabs(file_location.path)
-        # NOTE: MAYBE support relative path in future, now enforce absoulte path
-        # TODO: expose title in the converter
-        content = self.converter.convert(file_location.path, title=None)
+        path_convention = 'windows' if os.name == 'nt' else 'posix'
+        file_path = file_location.to_filesystem_path(path_convention=path_convention)
+        content = self.converter.convert(file_path, title=None)
         soup = BeautifulSoup(content, "lxml")
         title = soup.title.text
         text = inscriptis.get_text(content)

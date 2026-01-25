@@ -147,7 +147,7 @@ def create_app(searcher: "Searcher", resolver: "UriResolver", representer: HtmlR
     def view(id: str):
         try:
             resolved = resolver.resolve(f"pkms:///file/id:{id}")
-            file_path = resolved.file_location.fs_path
+            file_path = resolved.file_location.filesystem_path
             # print(file_path, flush=True)
 
             if not os.path.exists(file_path):

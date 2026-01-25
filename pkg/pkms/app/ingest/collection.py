@@ -51,6 +51,7 @@ class CollectionRuntime():
     pass
 
 from pkms.core.model import ScreeningStatus
+import os
 
 class Collection():
     Config = CollectionConfig
@@ -68,10 +69,12 @@ class Collection():
         documents = []
         c = self.components
         file_locations = c.globber.glob(self.base_path)
+        path_convention= 'windows' if os.name == 'nt' else 'posix'
         for file_location in file_locations:
+            file_path = file_location.to_filesystem_path(path_convention=path_convention)
             try:
                 if dry_run:
-                    print(f'process index: {repr(file_location.path)}')
+                    print(f'process index: {repr(file_path)}')
                     continue
                 screening_result = c.screener.screen([file_location])[0]
                 if screening_result.status == ScreeningStatus.APPROVED:
@@ -79,10 +82,10 @@ class Collection():
                     file_stamp = screening_result.file_stamp
                     indexed_document = c.indexer.index(file_location, file_stamp)
                     c.upserter.upsert(indexed_document)
-                    print(f'success index: {repr(file_location.path)}, id: {indexed_document.file_id}')
+                    print(f'success index: {repr(file_path)}, id: {indexed_document.file_id}')
                     documents.append(indexed_document)
                 else:
-                    print(f'skipped index: {repr(file_location.path)}, reason: {screening_result.reason}')
+                    print(f'skipped index: {repr(file_path)}, reason: {screening_result.reason}')
             except Exception as e:
-                print(f'skipped index: {repr(file_location.path)}, reason: {e}')
+                print(f'skipped index: {repr(file_path)}, reason: {e}')
         pass

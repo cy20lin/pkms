@@ -29,6 +29,8 @@ def ingest_html_collection(collection_path, db_path, dry_run):
     indexed_document = None
     documents = []
     for file_location in file_locations:
+        path_convention = 'windows' if os.name == 'nt' else 'posix'
+        file_path = file_location.to_filesystem_path(path_convention=path_convention)
         try:
             if dry_run:
                 print(f'process index: {repr(file_location.path)}')
@@ -39,12 +41,12 @@ def ingest_html_collection(collection_path, db_path, dry_run):
                 file_stamp = screening_result.file_stamp
                 indexed_document = html_indexer.index(file_location, file_stamp)
                 upserter.upsert(indexed_document)
-                print(f'success index: {repr(file_location.path)}, id: {indexed_document.file_id}')
+                print(f'success index: {repr(file_path)}, id: {indexed_document.file_id}')
                 documents.append(indexed_document)
             else:
-                print(f'skipped index: {repr(file_location.path)}, reason: {screening_result.reason}')
+                print(f'skipped index: {repr(file_path)}, reason: {screening_result.reason}')
         except Exception as e:
-            print(f'skipped index: {repr(file_location.path)}, reason: {e}')
+            print(f'skipped index: {repr(file_path)}, reason: {e}')
             print(e.with_traceback())
             break
 
