@@ -1,0 +1,16 @@
+
+[pytest]
+# Add default command line options, e.g., enabling verbosity and color
+addopts = ["-v", "--color=auto"]
+
+# Define the directories to search for tests
+testpaths = [
+    "test/pkg/test",
+]
+
+# Specify Python files that should be considered test files
+python_files = [
+    "test-*.py",
+    "test_*.py",
+    "*_test.py",
+]
