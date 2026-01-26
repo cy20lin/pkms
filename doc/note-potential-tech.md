@@ -71,3 +71,6 @@
 
 - for container base image
   - Alpine Linux: a lightweight base image os choice
+
+- for file content indexing
+  - https://github.com/VectifyAI/PageIndex
