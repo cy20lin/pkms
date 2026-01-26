@@ -22,6 +22,7 @@ from pkms.core.model import (
     SearchResult,
 )
 from pkms.component.searcher import Sqlite3Searcher
+from pkms.core.model._ReadyStatus import ReadyStatus
 
 # =========================
 # Models
@@ -41,6 +42,7 @@ class ResolvedTarget2:
 
 from pkms.component.resolver import UriResolver
 from pkms.core.model import ResolvedTarget
+import pkms
 
 # File uri to path
 import urllib.parse
@@ -127,6 +129,23 @@ def create_app(searcher: "Searcher", resolver: "UriResolver", representer: HtmlR
     def index():
         index_path = os.path.join(os.path.dirname(__file__), "index.html")
         return FileResponse(index_path)
+
+    @app.get("/api/ready", response_model=ReadyStatus)
+    def ready():
+        """
+        Dispatcher-facing readiness probe.
+        Must be fast, side-effect free, and reliable.
+        """
+        return ReadyStatus(
+            status="ready",
+            app="pkms-web",
+            version=pkms.__version__,  
+            capabilities={
+                "search": True,
+                "resolve": resolver is not None,
+                "render": ["html"],
+            },
+        )
 
     @app.get("/api/search", response_model=None)
     def search(

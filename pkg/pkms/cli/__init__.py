@@ -1,4 +1,5 @@
 from . import ingest
+from . import dispatch
 
 def main(argv: list[str] | None = None) -> int:
     from pkms.core.utility import CommandParser
@@ -8,6 +9,7 @@ def main(argv: list[str] | None = None) -> int:
         description="PKMS command line interface"
     )
     parser.add_command("ingest", ingest.main, "Ingest collections")
+    parser.add_command("dispatch", dispatch.main, "Dispatch PKMS URI to apps")
     parsed_args = parser.parse(args)
     command = parser.get_command(parsed_args.command)
     code = command(args)
