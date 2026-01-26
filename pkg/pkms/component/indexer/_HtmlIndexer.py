@@ -165,7 +165,7 @@ def parse_singlefile_html_metadata(content, parse_info_text=True, normalize_save
         # logging.debug(sf_comment)
         sf_metadata_content = sf_comment.group(1)
         end = sf_comment.end(1)
-        matches = re.finditer("\n\s+([_A-Za-z0-9\\- ]+): *", sf_metadata_content)
+        matches = re.finditer("\\n\\s+([_A-Za-z0-9\\- ]+): *", sf_metadata_content)
         key = None
         value_start = None
         value_end = None
