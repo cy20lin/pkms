@@ -205,6 +205,7 @@ def create_app(searcher: "Searcher", resolver: "UriResolver", representer: HtmlR
 
 def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
+        prog="pkms.web",
         description="PKMS Search WebApp (FastAPI)",
     )
 
@@ -236,8 +237,8 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main(argv: Optional[list[str]] = None) -> None:
-    args = parse_args(argv)
+def main(argv: list[str] = []) -> int:
+    args = parse_args(argv[1:])
 
     searcher_config = Sqlite3Searcher.Config(
         db_path=args.db_path,
@@ -255,7 +256,11 @@ def main(argv: Optional[list[str]] = None) -> None:
         port=args.port,
         reload=args.reload,
     )
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    argv = sys.argv
+    code = main(argv)
+    sys.exit(code)
