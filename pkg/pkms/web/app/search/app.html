@@ -1,0 +1,22 @@
+<div class="container">
+  <h1>PKMS</h1>
+
+  <input
+    id="queryInput"
+    type="text"
+    placeholder="Search your knowledge…"
+    autofocus
+  />
+
+  <div>
+    <button onclick="doSearch(0)">Search</button>
+  </div>
+
+  <div id="result" class="result"></div>
+
+  <div id="pagination" class="pagination" style="display:none;">
+    <button onclick="prevPage()">Prev</button>
+    <button onclick="nextPage()">Next</button>
+  </div>
+</div>
+

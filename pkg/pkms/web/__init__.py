@@ -7,9 +7,11 @@ import argparse
 import sqlite3
 import pathlib
 import traceback 
+from loguru import logger
 
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 from pkms.core.component.searcher import (
@@ -125,10 +127,45 @@ def create_app(searcher: "Searcher", resolver: "UriResolver", representer: HtmlR
     app = FastAPI(title="PKMS Search WebApp")
     app.add_middleware(HeaderMiddleware)
 
-    @app.get("/")
+    static_dir = os.path.join(os.path.dirname(__file__), "static")
+
+    app.mount(
+        "/static",
+        StaticFiles(directory=static_dir),
+        name="static",
+    )
+
+    @app.get("/", include_in_schema=False)
     def index():
+        """
+        Web shell entrypoint.
+        Client-side loads actual app (search/view/editor).
+        """
+        logger.info(f'HeeeeeeeeeeeeeeeeY')
         index_path = os.path.join(os.path.dirname(__file__), "index.html")
         return FileResponse(index_path)
+
+    @app.get("/app/{app_path:path}/app.{ext}", include_in_schema=False)
+    def app_(app_path: str, ext: str):
+        """
+        Load HTML fragment for a specific web app.
+        e.g. /app/search
+        """
+        logger.info(f'app_path: {app_path}')
+
+        # ── Build the absolute path on the filesystem ────────────────────────
+        base_dir   = pathlib.Path(__file__).parent / "app" / app_path 
+        file_path  = base_dir / f"app.{ext}"   
+
+        # ── Security: block “../” path‑traversal attacks ───────────────────────
+        if not file_path.resolve().is_relative_to(base_dir.resolve()):
+            raise HTTPException(status_code=403, detail="Forbidden")
+
+        if not file_path.is_file():
+            raise HTTPException(status_code=404, detail="File not found")
+
+        # ── FastAPI will stream the file for us ────────────────────────────────
+        return FileResponse(file_path)       # path = os.path.join(base, f"{app_name}")
 
     @app.get("/api/ready", response_model=ReadyStatus)
     def ready():
@@ -162,7 +199,7 @@ def create_app(searcher: "Searcher", resolver: "UriResolver", representer: HtmlR
         result: SearchResult = searcher.search(args)
         return result.model_dump()
 
-    @app.get("/api/view/{id}")
+    @app.get("/api/view/{id}", response_class=Response)
     def view(id: str):
         try:
             resolved = resolver.resolve(f"pkms:///file/id:{id}")
@@ -236,8 +273,10 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
 
     return parser.parse_args(argv)
 
+from ._logging import setup_logging
 
 def main(argv: list[str] = []) -> int:
+    setup_logging()
     args = parse_args(argv[1:])
 
     searcher_config = Sqlite3Searcher.Config(
@@ -250,11 +289,15 @@ def main(argv: list[str] = []) -> int:
     representer = HtmlRepresenter()
     app = create_app(searcher, resolver, representer)
 
+    logger.info(f'HIIIIIIIIIIIIIIII')
     uvicorn.run(
         app,
         host=args.host,
         port=args.port,
         reload=args.reload,
+        # avoid uvicorn override logger settings
+        log_config=None,
+        log_level=None,
     )
     return 0
 
