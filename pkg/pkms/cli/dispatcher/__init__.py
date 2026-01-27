@@ -54,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_command("uninstall", do_uninstall, "")
     parsed_args = parser.parse(args)
     command = parser.get_command(parsed_args.command)
-    code = command(args)
+    code = command(parsed_args.command_argv)
     return code
 
 __all__ = ['main']

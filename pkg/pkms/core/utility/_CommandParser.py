@@ -1,4 +1,5 @@
 import argparse
+from loguru import logger
 
 class CommandParser:
     def __init__(self, name, description, sep='.'):
@@ -10,22 +11,17 @@ class CommandParser:
         )
         self.subparsers = self.parser.add_subparsers(
             dest="command",
-            required=True
+            required=True,
+            metavar='command',
         )
         self.commands: dict = {}
     
     def add_command(self, name, command, descrpition=None):
         if descrpition is None:
             descrpition = f"Command {name}"
-        subparser = self.subparsers.add_parser(
+        self.subparsers.add_parser(
             name,
             help=descrpition
-        )
-        full_command = self.sep.join([self.name,name])
-        subparser.add_argument(
-            "args",
-            nargs=argparse.REMAINDER,
-            help=f"Arguments passed to {full_command}"
         )
         self.commands[name] = command
 
@@ -45,7 +41,10 @@ class CommandParser:
         return command
     
     def parse(self, args):
-        return self.parser.parse_args(args)
+        parsed_args, command_args = self.parser.parse_known_args(args)
+        parsed_args.command_args = command_args
+        parsed_args.command_argv = [parsed_args.command, *command_args]
+        return parsed_args
     
     def error(self, message:str):
         return self.parser.error(message=message)
