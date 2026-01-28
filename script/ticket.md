@@ -5,8 +5,6 @@
 It exists because the built-in `bd sync` workflow hides too many steps, states, and assumptions.
 This tool makes *every step visible, auditable, and predictable*.
 
----
-
 ## Design goals
 
 * Reduce cognitive load, not increase it
@@ -15,12 +13,21 @@ This tool makes *every step visible, auditable, and predictable*.
 * Failure is loud and early
 * Easy to migrate away from beads (JSONL-first)
 
----
-
 ## Command overview
 
 ```bash
-ticket.py {pull|push|sync|status|help} [origin] [branch] [worktree-dir]
+usage: ticket.py [-h] command [remote] [branch] [worktree]
+
+Predictable beads sync wrapper (human + agent safe)
+
+positional arguments:
+  command     operation to perform: one of {status, pull, push, sync, clean, help}
+  remote      git remote repo to sync to, default is 'origin'
+  branch      git branch to perform sync , default is 'beads-sync'
+  worktree    git worktree path to work in, default is './.git/beads-worktrees/beads-sync'
+
+options:
+  -h, --help  show this help message and exit
 ```
 
 ### Defaults
@@ -60,14 +67,15 @@ Success criteria:
 Steps:
 
 1. Ensure worktree exists
-2. `bd sync --flush-only`
-3. Detect changes in `.beads/issues.jsonl`
-4. If changed:
+2. Clean unpushed ticket(sync) commit if any (handled automatically)
+3. `bd sync --flush-only`
+4. Detect changes in sync-related `.beads` files
+5. If changed:
 
-   * `git add .beads/issues.jsonl`
+   * `git add` only the sync files
    * `git commit -m "ticket(sync): <local-iso-timestamp>"`
    * `git push <origin> <branch>`
-5. If no changes: considered **successful noop sync**
+6. If no changes: considered **successful noop sync**
 
 ---
 
@@ -99,7 +107,19 @@ Prints:
 
 This command is **read-only** and safe.
 
----
+### `ticket clean`
+
+Drops any unpushed `ticket(sync)` commit in the current worktree.
+
+Usage:
+
+```bash
+ticket.py clean [origin] [branch] [worktree-dir]
+```
+
+* Only affects commits created by `ticket(sync)` that have not yet been pushed
+* Ensures worktree history is clean before pull/push operations
+* Safe and idempotent
 
 ## Commit message convention
 
@@ -116,8 +136,6 @@ Rationale:
 * Distinguishes personal workflow tooling from beads internals
 * Follows conventional-commit style (`tool(scope)`)
 
----
-
 ## Safety checks
 
 Before any mutating operation, `ticket.py` verifies:
@@ -125,10 +143,9 @@ Before any mutating operation, `ticket.py` verifies:
 * Worktree directory exists
 * Worktree is on the expected branch
 * Previous command succeeded
+* Unpushed ticket(sync) commits are either cleaned or handled
 
 Failure aborts immediately with a clear error.
-
----
 
 ## Non-goals
 
