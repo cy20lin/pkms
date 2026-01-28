@@ -60,3 +60,6 @@ components-verify:
 
 git-history:
     git --no-pager log --pretty=format:"%ad -- %s" --date=short
+
+ticket *args:
+    python ./script/ticket.py {{args}}
