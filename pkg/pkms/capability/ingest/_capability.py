@@ -11,11 +11,11 @@ from pkms.component.upserter import Sqlite3Upserter
 from pkms.component.resolver import UriResolver
 from pkms.component.searcher import Sqlite3Searcher
 
-from .registry import (
+from ._registry import (
     ComponentRegistry,
     ComponentRegistryConfig,
 )
-from .collection import (
+from ._collection import (
     ComponentsConfig,
     CollectionComponents,
     CollectionConfig,

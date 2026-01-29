@@ -6,7 +6,7 @@ import commentjson as json
 from loguru import logger as logging
 
 from pkms.core.utility import str_to_bool
-from pkms.capability.ingest.capability import IngestCapability, IngestConfig
+from pkms.capability.ingest._capability import IngestCapability, IngestConfig
 
 def parse_args(argv:list[str]=None):
     parser = argparse.ArgumentParser("Ingest specified collection of owned file resources")
