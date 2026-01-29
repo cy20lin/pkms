@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List, Literal, Annotated, Union, TypeAlias
 from pydantic import BaseModel, ConfigDict, Field
-from loguru import logger as logging
+from loguru import logger
 
 from pkms.component.globber import PathspecGlobber
 from pkms.component.indexer import HtmlIndexer
@@ -25,15 +25,17 @@ from .collection import (
 from pkms.core.component import Component, ComponentConfig, ComponentRuntime
 from pkms.component import ComponentConfigUnion
 
-class AppConfig(BaseModel):
+class IngestConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: Optional[str] = None
     description: Optional[str] = None
     components: ComponentRegistryConfig
     collections: List[CollectionConfig] 
 
-class App():
-    Config = AppConfig
+IngestState: TypeAlias = IngestConfig
+
+class IngestRuntime():
+    Config = IngestConfig
     _COMPONENT_CLASS_MAP = {
         'PathspecGlobberConfig': PathspecGlobber,
         'SimpleScreenerConfig': SimpleScreener,
@@ -44,8 +46,18 @@ class App():
         'UriResolverConfig': UriResolver,
         'Sqlite3SearcherConfig': Sqlite3Searcher,
     }
-    def __init__(self, *, config, runtime=None):
-        self.config : AppConfig = config
+    def _update_state(self, state: IngestState|None, config: IngestConfig|None):
+        config_dump = config.model_dump() if config else {}
+        state_dump = state.model_dump() if state else {}
+        merged_dump = {**state_dump, **config_dump}
+        updated_state = IngestState.model_validate(merged_dump)
+        return updated_state
+
+    def __init__(self, *, config=None, state=None, runtime=None):
+        self.base_logger = logger
+        self.logger = logger
+        self.config : IngestConfig = config
+        self._state : IngestState = self._update_state(state, config)
         self.runtime : None = runtime
         self.collections: list[Collection] = []
         self.components = ComponentRegistry()
@@ -56,7 +68,7 @@ class App():
     
     def _setup(self):
         config = self.config
-        logging.debug(f'load config, config.name={config.name}')
+        self.base_logger.debug(f'load config, config.name={config.name}')
 
         self.components.clear()
         for name, component_config in config.components.items():
@@ -86,9 +98,13 @@ class App():
             del collection_components
             self.collections.append(collection)
     
+class IngestCapability:
+    def __init__(self, runtime: IngestRuntime):
+        self.runtime = runtime
+
     def _ingest(self, dry_run):
-        for c in self.collections:
-            c.ingest(dry_run=dry_run)
+        for collection in self.runtime.collections:
+            collection.ingest(dry_run=dry_run)
 
     def run(self, dry_run=True):
         self._ingest(dry_run=dry_run)

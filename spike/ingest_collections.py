@@ -6,7 +6,7 @@ import commentjson as json
 from loguru import logger as logging
 
 from pkms.core.utility import str_to_bool
-from pkms.capability.ingest.app import App, AppConfig
+from pkms.capability.ingest.capability import IngestCapability, IngestConfig
 
 def parse_args(argv:list[str]=None):
     parser = argparse.ArgumentParser("Ingest specified collection of owned file resources")
@@ -22,8 +22,8 @@ def main(argv):
         config_json = {}
         with open(args.config_path, 'r') as f:
             config_json = json.load(f)
-        config = AppConfig(**config_json)
-        app = App(config=config)
+        config = IngestConfig(**config_json)
+        app = IngestCapability(config=config)
         app.run(dry_run=args.dry_run)
     except Exception as e:
         for s in traceback.format_exception(e):
