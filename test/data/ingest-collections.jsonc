@@ -1,0 +1,106 @@
+// The testing working directory is expected to be at 
+// "{PROJECT_ROOT}/test/tmp/ingest-collections"
+{
+    "name": "test-ingest-collections",
+    "description": "a test config for ingest-collections",
+    "components": {
+        "globber": {
+            "type": "PathspecGlobberConfig",
+            "patterns": [
+                "*.*"
+            ]
+        },
+        "screener": {
+            "type": "SimpleScreenerConfig"
+        },
+        "html_indexer": {
+            "type": "HtmlIndexerConfig"
+        },
+        "markdown_indexer": {
+            "type": "MarkdownIndexerConfig",
+            "converter": {
+                "title": null,
+                "title_from_metadata": true,
+                "title_from_h1": true,
+                "title_from_filename": true,
+                "title_fallback": null,
+                "redirect_base": "http://127.0.0.1:43471/redirect?target="
+            }
+        },
+        "odt_indexer": {
+            "type": "OdtIndexerConfig",
+            "converter": {
+                "show_page_breaks": false,
+                "title": null,
+                "title_from_metadata": true,
+                "title_from_styled_title": true,
+                "title_from_h1": true,
+                "title_from_filename": true,
+                "title_fallback": null,
+            }
+        },
+        "upserter": {
+            "type": "Sqlite3UpserterConfig",
+            "db_path": "pkms.db"
+        },
+        "resolver": {
+            "type": "UriResolverConfig",
+            "db_path": "pkms.db"
+        },
+        "searcher": {
+            "type": "Sqlite3SearcherConfig",
+            "db_path": "pkms.db"
+        }
+    },
+    "collections": [
+        {
+            "name": "html_test",
+            "description": "",
+            "base_path":"../../data/collections/html",
+            "components": {
+                "globber": "$globber",
+                "screener": "$screener",
+                "indexer": "$html_indexer",
+                "upserter": "$upserter",
+                "resolver": "$resolver",
+                "searcher": "$searcher"
+            }
+        },
+        {
+            "name": "odt_test",
+            "description": "",
+            "base_path":"../../data/collections/odt",
+            "components": {
+                "globber": {
+                    "type": "PathspecGlobberConfig",
+                    "patterns": [
+                        "*.odt"
+                    ]
+                },
+                "screener": "$screener",
+                "indexer": "$odt_indexer",
+                "upserter": "$upserter",
+                "resolver": "$resolver",
+                "searcher": "$searcher"
+            }
+        },
+        {
+            "name": "markdown_test",
+            "description": "",
+            "base_path": "../../data/collections/markdown",
+            "components": {
+                "globber": {
+                    "type": "PathspecGlobberConfig",
+                    "patterns": [
+                        "*.md"
+                    ]
+                },
+                "screener": "$screener",
+                "indexer": "$markdown_indexer",
+                "upserter": "$upserter",
+                "resolver": "$resolver",
+                "searcher": "$searcher"
+            }
+        }
+    ]
+}
