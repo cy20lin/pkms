@@ -1,4 +1,4 @@
-from pkms.app.dispatcher import WindowsDispatcherInstaller
+from pkms.capability.dispatcher import WindowsDispatcherInstaller
 import os
 import pathlib
 from dataclasses import asdict

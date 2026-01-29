@@ -5,7 +5,7 @@ import commentjson as json
 from loguru import logger as logging
 
 from pkms.core.utility import str_to_bool
-from pkms.app.ingest.app import App, AppConfig
+from pkms.capability.ingest.app import App, AppConfig
 
 def parse_args(argv:list[str]=None):
     parser = argparse.ArgumentParser(
