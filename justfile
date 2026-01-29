@@ -63,3 +63,6 @@ git-history:
 
 ticket *args:
     python ./script/ticket.py {{args}}
+
+pkms *args:
+    uv run python -m pkms {{args}}
