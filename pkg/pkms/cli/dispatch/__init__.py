@@ -1,7 +1,7 @@
 from pkms.component.resolver import UriResolver
 from pkms.core.model import ResolvedTarget
 
-from loguru import logger as logging
+from loguru import logger
 
 import os.path
 import os
@@ -9,6 +9,8 @@ import argparse
 import pathlib
 import requests
 import webbrowser
+import os
+import sys
 
 def server_ready(base_url: str, timeout=0.05) -> bool:
     try:
@@ -44,10 +46,15 @@ def parse_args(argv:list[str]=None):
 
 def main(argv: list[str]) -> int:
     args = parse_args(argv)
-    
-    # NOTE: TEMPORARY 
-    project_root_path= pathlib.Path(__file__).parents[4]
-    db_path = project_root_path / 'pkms.db'
+    default_workspace_dir = pathlib.Path.home() / ".pkms"
+    env_workspace_dir = os.getenv("PKMS_WORKSPACE_DIR")
+    logger.debug(f'env.PKMS_WORKSPACE_DIR={env_workspace_dir!r}')
+    if env_workspace_dir:
+        workspace_dir = pathlib.Path(env_workspace_dir)
+    else:
+        workspace_dir = default_workspace_dir
+
+    db_path = workspace_dir / 'index.db'
     db_path_str = db_path.as_posix()
     config = UriResolver.Config(
         db_path=db_path_str
@@ -59,13 +66,12 @@ def main(argv: list[str]) -> int:
         target = resolver.resolve(args.uri)
         handler.handle(target)
     except Exception as e:
-        logging.critical(f"[PKMS URI ERROR] {e}", file=sys.stderr)
+        logger.critical(f"[PKMS URI ERROR] {e}", file=sys.stderr)
         return 2
 
 if __name__ == '__main__':
-    import sys
-    logging.remove()
-    logging.add(sys.stderr, level="DEBUG")
+    logger.remove()
+    logger.add(sys.stderr, level="DEBUG")
     argv = sys.argv
     code = main(argv)
     sys.exit(code)
