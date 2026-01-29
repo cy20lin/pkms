@@ -26,7 +26,7 @@ class PathspecGlobber(Globber):
 
     def __init__(self, config:PathspecGlobberConfig, runtime:PathspecGlobberRuntime=None):
         super().__init__(config=config, runtime=runtime)
-        self._pathspec = pathspec.PathSpec.from_lines(pattern_factory='gitignore', lines=config.patterns)
+        self._pathspec = pathspec.PathSpec.from_lines(pattern_factory='gitwildmatch', lines=config.patterns)
     
     def glob(self, base_path:str) -> FileLocation:
         base_path_ = pathlib.Path(base_path, '')
