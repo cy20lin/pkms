@@ -129,6 +129,16 @@ def create_app(searcher: "Searcher", resolver: "UriResolver", representer: HtmlR
 
     static_dir = os.path.join(os.path.dirname(__file__), "static")
 
+    # # -------------------- STARTUP --------------------
+    @app.on_event("startup")
+    async def _startup() -> None:
+        print("Startup")
+
+    # -------------------- SHUTDOWN -------------------
+    @app.on_event("shutdown")
+    async def _shutdown() -> None:
+        print("Shutdown –")
+
     app.mount(
         "/static",
         StaticFiles(directory=static_dir),
@@ -239,11 +249,26 @@ def create_app(searcher: "Searcher", resolver: "UriResolver", representer: HtmlR
     return app
 
 # ---------- CLI / Entrypoint ----------
+SUPPORTED_EXPOSE = ("local", "tailscale")
 
 def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="pkms.web",
         description="PKMS Search WebApp (FastAPI)",
+    )
+
+    parser.add_argument(
+        "--expose",
+        action="append",
+        dest="expose",
+        metavar="NETWORK",
+        default=None,
+        choices=SUPPORTED_EXPOSE,
+        help=(
+            "Expose PKMS server on selected network interface. "
+            "Can be specified multiple times. "
+            f"Supported: {', '.join(SUPPORTED_EXPOSE)}"
+        ),
     )
 
     parser.add_argument(
@@ -271,7 +296,82 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
         help="Enable auto reload (dev only)",
     )
 
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.expose is None:
+        args.expose = ['local', 'tailscale']
+
+    return args
+
+import psutil
+import time
+
+class NetworkResolver:
+    def resolve(self, expose: list[str], ips:None|str|list[str]) -> list[str]:
+        if ips is None:
+            ips = set()
+        elif isinstance(ips, str):
+            ips = {ips}
+        else:
+            ips = set(ips)
+
+        if "local" in expose:
+            ips.add("127.0.0.1")
+
+        if "tailscale" in expose:
+            for addrs in psutil.net_if_addrs().values():
+                for a in addrs:
+                    if a.family.name == "AF_INET" and a.address.startswith("100."):
+                        ips.add(a.address)
+        return list(ips)
+    
+import asyncio, socket, uvicorn
+from typing import List
+
+# -------------------------------------------------
+# 1️⃣ 把一組 IP+port 包成非阻塞 socket (IPv4)
+# -------------------------------------------------
+# def make_sockets(hosts: List[str], port: int) -> List[socket.socket]:
+#     socks: List[socket.socket] = []
+#     for h in hosts:
+#         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#         # Windows 需要額外的獨佔旗標，避免「Address already in use」錯誤
+#         if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+#             s.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+#         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+#         s.bind((h, port))
+#         s.listen()
+#         s.setblocking(False)          # uvicorn 只能使用非阻塞 socket
+#         socks.append(s)
+#     return socks
+
+def make_sockets(hosts, port):
+    socks = []
+    for h in hosts:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind((h, port))
+        s.listen()
+        s.setblocking(False)
+        socks.append(s)
+    return socks
+
+async def async_serve(app: FastAPI, cfg: uvicorn.Config, ips: List[str]) -> int:
+    server = uvicorn.Server(cfg)
+    sockets = make_sockets(ips, cfg.port)
+
+    try:
+        await server.serve(sockets=sockets)
+        return 0
+    except KeyboardInterrupt: # possibly not catched
+        return 0
+    except asyncio.CancelledError: # possibly not catched
+        return 0
+    finally:
+        for s in sockets:
+            try:
+                s.close()
+            except OSError:
+                pass
 
 from ._logging import setup_logging
 
@@ -289,9 +389,13 @@ def main(argv: list[str] = []) -> int:
     representer = HtmlRepresenter()
     app = create_app(searcher, resolver, representer)
 
-    logger.info(f'HIIIIIIIIIIIIIIII')
-    uvicorn.run(
-        app,
+    network_resolver = NetworkResolver()
+    bind_ips = network_resolver.resolve(args.expose, ips=args.host)
+    for ip in bind_ips:
+        logger.info(f'host_on: http://{ip}:{args.port}')
+    
+    cfg = uvicorn.Config(
+        app, 
         host=args.host,
         port=args.port,
         reload=args.reload,
@@ -299,11 +403,28 @@ def main(argv: list[str] = []) -> int:
         log_config=None,
         log_level=None,
     )
-    return 0
 
+    try:
+        code = asyncio.run(async_serve(app,cfg,bind_ips))
+    except KeyboardInterrupt:
+        logger.info('keyboard interrupt')
+        code = 0
+
+    logger.info(f'about to return, code={code}')
+    return code
+
+import signal
+def block_sigint():
+    # only the *main* thread receives SIGINT, children ignore it
+    signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGINT})
 
 if __name__ == "__main__":
+    block_sigint()
     import sys
     argv = sys.argv
     code = main(argv)
+    # For Debug
+    logger.info(f'about to exit, code={code}')
+    f = open('zzz.txt', 'wb')
+    f.write('ZZZ\n')
     sys.exit(code)
