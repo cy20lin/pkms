@@ -3,6 +3,7 @@ import signal
 import uvicorn
 from fastapi import FastAPI
 import psutil
+import sys
 
 app = FastAPI()
 
@@ -45,8 +46,6 @@ class MultiServer:
             server.should_exit = True
 
 if __name__ == "__main__":
-    # 定義你想要監聽的特定 IP 與 Port
-    # 請將 '10.8.0.5' 替換為你的 VPN 實際 IP
     resolver = NetworkResolver()
     ips = resolver.resolve(['local','tailscale'])
     configs = [
@@ -62,3 +61,4 @@ if __name__ == "__main__":
     # 執行非阻塞的事件迴圈
     asyncio.run(manager.serve())
     f = open("end.txt", 'wb')
+    sys.exit(0)

@@ -249,7 +249,7 @@ def create_app(searcher: "Searcher", resolver: "UriResolver", representer: HtmlR
     return app
 
 # ---------- CLI / Entrypoint ----------
-SUPPORTED_EXPOSE = ("local", "tailscale")
+SUPPORTED_EXPOSE = ("localhost", "tailscale")
 
 def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -279,7 +279,9 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
 
     parser.add_argument(
         "--host",
-        default="127.0.0.1",
+        action="append",
+        dest="host",
+        default=None,
         help="Bind host (default: 127.0.0.1)",
     )
 
@@ -298,7 +300,9 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
 
     args = parser.parse_args(argv)
     if args.expose is None:
-        args.expose = ['local', 'tailscale']
+        args.expose = ['tailscale']
+    if args.host is None:
+        args.host = ['127.0.0.1']
 
     return args
 
@@ -314,7 +318,7 @@ class NetworkResolver:
         else:
             ips = set(ips)
 
-        if "local" in expose:
+        if "localhost" in expose:
             ips.add("127.0.0.1")
 
         if "tailscale" in expose:
@@ -327,31 +331,20 @@ class NetworkResolver:
 import asyncio, socket, uvicorn
 from typing import List
 
-# -------------------------------------------------
-# 1️⃣ 把一組 IP+port 包成非阻塞 socket (IPv4)
-# -------------------------------------------------
-# def make_sockets(hosts: List[str], port: int) -> List[socket.socket]:
-#     socks: List[socket.socket] = []
-#     for h in hosts:
-#         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#         # Windows 需要額外的獨佔旗標，避免「Address already in use」錯誤
-#         if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
-#             s.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
-#         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-#         s.bind((h, port))
-#         s.listen()
-#         s.setblocking(False)          # uvicorn 只能使用非阻塞 socket
-#         socks.append(s)
-#     return socks
 
-def make_sockets(hosts, port):
+import os
+
+def make_sockets(hosts, port, strict=True):
     socks = []
     for h in hosts:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if strict and os.name == 'nt' and hasattr(socket, 'SO_EXCLUSIVEADDRUSE'):
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        else:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((h, port))
         s.listen()
-        s.setblocking(False)
+        s.setblocking(False) # use non-blocking for uvicorn 
         socks.append(s)
     return socks
 
@@ -361,10 +354,6 @@ async def async_serve(app: FastAPI, cfg: uvicorn.Config, ips: List[str]) -> int:
 
     try:
         await server.serve(sockets=sockets)
-        return 0
-    except KeyboardInterrupt: # possibly not catched
-        return 0
-    except asyncio.CancelledError: # possibly not catched
         return 0
     finally:
         for s in sockets:
@@ -396,7 +385,7 @@ def main(argv: list[str] = []) -> int:
     
     cfg = uvicorn.Config(
         app, 
-        host=args.host,
+        host='127.0.0.1',
         port=args.port,
         reload=args.reload,
         # avoid uvicorn override logger settings
@@ -413,18 +402,8 @@ def main(argv: list[str] = []) -> int:
     logger.info(f'about to return, code={code}')
     return code
 
-import signal
-def block_sigint():
-    # only the *main* thread receives SIGINT, children ignore it
-    signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGINT})
-
 if __name__ == "__main__":
-    block_sigint()
     import sys
     argv = sys.argv
     code = main(argv)
-    # For Debug
-    logger.info(f'about to exit, code={code}')
-    f = open('zzz.txt', 'wb')
-    f.write('ZZZ\n')
     sys.exit(code)
