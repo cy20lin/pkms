@@ -72,7 +72,7 @@ class SafeNestFormatter(string.Formatter):
     #   1)  Turn the *field_name* string into a list of look‑up steps.
     # ------------------------------------------------------------------
     @classmethod
-    def _tokenise(cls, field_name: str) -> list[Any]:
+    def tokenize(cls, field_name: str) -> list[Any]:
         """
         Convert a field name like ``a.b[0]["c"].d`` into the list
         ``['a', 'b', 0, 'c', 'd']``.
@@ -158,7 +158,7 @@ class SafeNestFormatter(string.Formatter):
             ) from exc
 
         # 1️⃣ Tokenise the field name into look‑up steps.
-        steps = self._tokenise(field_name)
+        steps = self.tokenize(field_name)
 
         # 2️⃣ Walk the container using ``get_nest_item``.
         value = get_nest_item(root, steps)
@@ -227,8 +227,6 @@ if __name__ == "__main__":
     }
 
     fmt = SafeNestFormatter()
-    x = fmt._tokenise("a[0]b")
-    print(x)
 
     # Simple dot‑only nesting
     print(fmt.format("{user.name.first}", root=data))          # Ada
