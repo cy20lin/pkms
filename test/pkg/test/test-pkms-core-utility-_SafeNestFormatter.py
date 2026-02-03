@@ -61,7 +61,7 @@ def fmt(template: str, root: dict) -> str:
     ],
 )
 def test_tokeniser_basic(field, expected):
-    steps = SafeNestFormatter._tokenise(field)
+    steps = SafeNestFormatter.tokenize(field)
     assert steps == expected
 
 
@@ -84,7 +84,7 @@ def test_tokeniser_basic(field, expected):
 def test_tokeniser_rejects_invalid_syntax(bad_field):
     # assert bad_field == ''
     with pytest.raises(ValueError, match="Invalid field|Empty field|exceeds|too deep"):
-        SafeNestFormatter._tokenise(bad_field)
+        SafeNestFormatter.tokenize(bad_field)
 
 
 # ----------------------------------------------------------------------
@@ -209,11 +209,11 @@ def test_format_specifiers_allow_small_numbers(data):
 # ----------------------------------------------------------------------
 def test_invalid_dot_places():
     with pytest.raises(ValueError):
-        SafeNestFormatter._tokenise(".a")
+        SafeNestFormatter.tokenize(".a")
     with pytest.raises(ValueError):
-        SafeNestFormatter._tokenise("a..b")
+        SafeNestFormatter.tokenize("a..b")
     with pytest.raises(ValueError):
-        SafeNestFormatter._tokenise("a.")  # trailing dot
+        SafeNestFormatter.tokenize("a.")  # trailing dot
 
 # ----------------------------------------------------------------------
 # 9️⃣  Verify that the class constants can be overridden safely (optional).
