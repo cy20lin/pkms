@@ -7,11 +7,11 @@ class ListHandler(NodeHandler):
     def is_leaf(self, node):
         return False
 
-    def resolve_leaf(self, node, *, context):
+    def resolve_leaf(self, node, *, context, getter):
         raise AssertionError
 
     def iter_children(self, node:list):
-        return iter(node)
+        return iter(enumerate(node))
 
     def rebuild(self, node:list, children:list):
         assert len(node) == len(children)

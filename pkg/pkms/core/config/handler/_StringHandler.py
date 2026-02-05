@@ -14,5 +14,5 @@ class StringHandler(NodeHandler):
     def is_leaf(self, node):
         return True
     
-    def resolve_leaf(self, node, *, context):
-        return self.resolver.resolve(node, context)
+    def resolve_leaf(self, node, *, context, getter):
+        return self.resolver.resolve(node, context, getter)

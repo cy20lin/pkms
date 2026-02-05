@@ -4,12 +4,14 @@ from ._SafeNestFormatter import (
     SafeNestFormatter
 )
 import re
+from ._NestItemGetter import NestItemGetter
+from ._SimpleNestItemGetter import SimpleNestItemGetter
 
 class DollarBracesRefResolver:
 
     PATTERN = re.compile(r'^(?P<dollar>\$+)(?P<open>\{+)(?P<ref>[\w.]+)(?P<close>\}+)$')
     def __init__(self):
-        pass
+        self.getter = SimpleNestItemGetter()
 
     def _get_unescaped_or_ref(self, target):
         unescaped = None
@@ -23,10 +25,10 @@ class DollarBracesRefResolver:
                     unescaped = target[1:]
         return unescaped, ref
 
-    def resolve(self, target:Any, root:dict) -> Any:
-        return self.try_resolve(target, root)[1]
+    def resolve(self, target:Any, root:dict, getter:NestItemGetter) -> Any:
+        return self.try_resolve(target, root, getter)[1]
 
-    def try_resolve(self, target:Any, root:dict) -> Any:
+    def try_resolve(self, target:Any, root:dict, getter: NestItemGetter) -> Any:
         is_resolved = False
         result = target
         if isinstance(target, str):
@@ -36,6 +38,6 @@ class DollarBracesRefResolver:
                 is_resolved = True
             elif ref:
                 parts = SafeNestFormatter.tokenize(ref)
-                result = get_nest_item(root, parts)
+                result = getter.get(root, parts)
                 is_resolved = True
         return is_resolved, result

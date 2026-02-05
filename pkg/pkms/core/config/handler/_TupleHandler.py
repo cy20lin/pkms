@@ -11,7 +11,7 @@ class TupleHandler(NodeHandler):
         raise AssertionError
 
     def iter_children(self, node:tuple):
-        return iter(node)
+        return iter(enumerate(node))
 
     def rebuild(self, node:tuple, children:list):
         assert len(node) == len(children)

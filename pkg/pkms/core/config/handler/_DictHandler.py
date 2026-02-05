@@ -7,11 +7,11 @@ class DictHandler(NodeHandler):
     def is_leaf(self, node):
         return False
 
-    def resolve_leaf(self, node, *, context):
+    def resolve_leaf(self, node, *, context, getter):
         raise AssertionError
 
-    def iter_children(self, node):
-        return node.values()
+    def iter_children(self, node:dict):
+        return iter(node.items())
 
     def rebuild(self, node, children):
         assert len(node) == len(children)

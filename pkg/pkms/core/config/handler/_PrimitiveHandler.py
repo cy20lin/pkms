@@ -9,7 +9,7 @@ class PrimitiveHandler(NodeHandler):
     def is_leaf(self, node):
         return True
 
-    def resolve_leaf(self, node, *, context):
+    def resolve_leaf(self, node, *, context, getter):
         return node
 
     def iter_children(self, node:list):

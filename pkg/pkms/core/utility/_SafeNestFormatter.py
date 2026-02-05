@@ -1,6 +1,8 @@
 import re
 import string
 from typing import Any, Mapping, Sequence
+from ._NestItemGetter import NestItemGetter
+from ._SimpleNestItemGetter import SimpleNestItemGetter
 
 # ----------------------------------------------------------------------
 # Helper that walks the root using a list of keys / indices.
@@ -67,6 +69,11 @@ class SafeNestFormatter(string.Formatter):
         """,
         re.VERBOSE,
     )
+
+    def __init__(self, getter: NestItemGetter = None):
+        if getter is None:
+            getter = SimpleNestItemGetter()
+        self.getter = getter
 
     # ------------------------------------------------------------------
     #   1)  Turn the *field_name* string into a list of look‑up steps.
@@ -156,12 +163,13 @@ class SafeNestFormatter(string.Formatter):
                 "SafeNestFormatter expects a keyword argument named 'root' that "
                 "holds the top‑level container."
             ) from exc
+        getter: NestItemGetter = kwargs.get('getter', self.getter)
 
         # 1️⃣ Tokenise the field name into look‑up steps.
         steps = self.tokenize(field_name)
 
-        # 2️⃣ Walk the container using ``get_nest_item``.
-        value = get_nest_item(root, steps)
+        # 2️⃣ Walk the container using the nest item getter
+        value = getter.get(root, steps)
 
         # ``get_field`` in the base class returns a tuple ``(obj, used_key)``.
         # ``used_key`` is the *original* string that the formatter used to fetch

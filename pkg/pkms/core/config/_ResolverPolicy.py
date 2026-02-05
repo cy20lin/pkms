@@ -29,9 +29,9 @@ class ResolverPolicy:
     def is_leaf(self, node):
         return self._handler_for(node).is_leaf(node)
 
-    def resolve_leaf(self, node, *, context):
+    def resolve_leaf(self, node, *, context, getter):
         return self._handler_for(node).resolve_leaf(
-            node, context=context
+            node, context=context, getter=getter
         )
 
     def iter_children(self, node):

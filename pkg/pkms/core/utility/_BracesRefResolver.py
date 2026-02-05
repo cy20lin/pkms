@@ -7,6 +7,8 @@ from ._DollarBracesRefResolver import (
     DollarBracesRefResolver
 )
 import re
+from ._NestItemGetter import NestItemGetter
+from ._SimpleNestItemGetter import SimpleNestItemGetter
 
 class BracesRefResolver:
 
@@ -14,16 +16,17 @@ class BracesRefResolver:
     def __init__(self):
         self.fmt_braces_formatter = SafeNestFormatter()
         self.dollar_braces_resolver = DollarBracesRefResolver()
+        self.getter = SimpleNestItemGetter()
 
-    def resolve(self, target:Any, root:dict) -> Any:
-        return self.try_resolve(target, root)[1]
+    def resolve(self, target:Any, root:dict, getter:NestItemGetter) -> Any:
+        return self.try_resolve(target, root, getter)[1]
 
-    def try_resolve(self, target:Any, root:dict) -> Any:
-        is_resolved, result =self.dollar_braces_resolver.try_resolve(target, root)
+    def try_resolve(self, target:Any, root:dict, getter:NestItemGetter) -> Any:
+        is_resolved, result =self.dollar_braces_resolver.try_resolve(target, root, getter=getter)
         if is_resolved:
             pass
         elif isinstance(target, str):
-            result = self.fmt_braces_formatter.format(target, root=root)
+            result = self.fmt_braces_formatter.format(target, root=root, getter=getter)
             is_resolved=True
         else:
             result = target
