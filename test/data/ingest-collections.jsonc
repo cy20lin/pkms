@@ -41,22 +41,22 @@
         },
         "upserter": {
             "type": "Sqlite3UpserterConfig",
-            "db_path": "pkms.db"
+            "db_path": "${var.WORKSPACE_INDEX_DB_PATH}"
         },
         "resolver": {
             "type": "UriResolverConfig",
-            "db_path": "pkms.db"
+            "db_path": "${var.WORKSPACE_INDEX_DB_PATH}"
         },
         "searcher": {
             "type": "Sqlite3SearcherConfig",
-            "db_path": "pkms.db"
+            "db_path": "${var.WORKSPACE_INDEX_DB_PATH}"
         }
     },
     "collections": [
         {
             "name": "html_test",
             "description": "",
-            "base_path":"../../data/collections/html",
+            "base_path":"{var.CURRENT_CONFIG_DIR}/collections/html",
             "components": {
                 "globber": "$globber",
                 "screener": "$screener",
@@ -69,7 +69,7 @@
         {
             "name": "odt_test",
             "description": "",
-            "base_path":"../../data/collections/odt",
+            "base_path":"{var.CURRENT_CONFIG_DIR}/collections/odt",
             "components": {
                 "globber": {
                     "type": "PathspecGlobberConfig",
@@ -87,7 +87,7 @@
         {
             "name": "markdown_test",
             "description": "",
-            "base_path": "../../data/collections/markdown",
+            "base_path":"{var.CURRENT_CONFIG_DIR}/collections/markdown",
             "components": {
                 "globber": {
                     "type": "PathspecGlobberConfig",
