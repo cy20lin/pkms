@@ -31,5 +31,9 @@ class Globber(Component):
         super().__init__(config=config, runtime=runtime)
 
     @abstractmethod
-    def glob(self, base_path) -> list[FileLocation]:
+    def glob(self, base_location:FileLocation) -> list[FileLocation]:
+        ...
+
+    @abstractmethod
+    def match(self, file_location:FileLocation) -> bool:
         ...

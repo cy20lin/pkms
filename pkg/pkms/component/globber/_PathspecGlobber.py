@@ -28,16 +28,34 @@ class PathspecGlobber(Globber):
         super().__init__(config=config, runtime=runtime)
         self._pathspec = pathspec.PathSpec.from_lines(pattern_factory='gitwildmatch', lines=config.patterns)
     
-    def glob(self, base_path:str) -> FileLocation:
-        base_path_ = pathlib.Path(base_path, '')
-        base_path_str = _try_append_slash(base_path_.absolute().as_posix())
-        sub_paths = self._pathspec.match_tree_files(root=base_path_str, negate=self.config.negate)
-        path_convention = 'windows' if isinstance(base_path_, pathlib.WindowsPath) else 'posix'
-        result = [ 
-            FileLocation.from_filesystem_path(sub_path, base_path=base_path_str, path_convention=path_convention)
-            for sub_path in sub_paths 
-        ]
+    def glob(self, base_location:FileLocation) -> FileLocation:
+        result = []
+        if base_location.scheme == 'file' and base_location.authority == '':
+            path_convention = 'windows' if os.name == 'nt' else 'posix'
+            base_path = base_location.to_filesystem_path(path_convention=path_convention)
+            base_path_ = pathlib.Path(base_path, '')
+            base_path_str = _try_append_slash(base_path_.absolute().as_posix())
+            sub_paths = self._pathspec.match_tree_files(root=base_path_str, negate=self.config.negate)
+            result = [ 
+                FileLocation.from_filesystem_path(sub_path, base_path=base_path_str, path_convention=path_convention)
+                for sub_path in sub_paths 
+            ]
+        else:
+            raise RuntimeError(
+                f'Unsupported scheme={base_location.scheme}'
+                f' and authority={base_location.authority!r}'
+                f' with base_location={base_location}'
+            )
         return result
+    
+    def match(self, file_location: FileLocation) -> bool:
+        result = False
+        if file_location.scheme == 'file' and file_location.authority == '':
+            path_convention = 'windows' if os.name == 'nt' else 'posix'
+            file_path = file_location.to_filesystem_path(path_convention=path_convention)
+            result = self._pathspec.match_file(file_path)
+        return result
+
 
 
 
