@@ -66,3 +66,6 @@ ticket *args:
 
 pkms *args:
     uv run python -m pkms {{args}}
+
+loc:
+    cloc pkg test doc script spike
