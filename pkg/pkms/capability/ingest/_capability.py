@@ -24,6 +24,7 @@ from ._collection import (
 )
 from pkms.core.component import Component, ComponentConfig, ComponentRuntime
 from pkms.component import ComponentConfigUnion
+from pkms.core.model import FileLocation
 
 class IngestConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -33,6 +34,8 @@ class IngestConfig(BaseModel):
     collections: List[CollectionConfig] 
 
 IngestState: TypeAlias = IngestConfig
+from pkms.core.utility import FileLocationMatcher
+from pkms.core.utility import SimpleFileLocationMatcher
 
 class IngestRuntime():
     Config = IngestConfig
@@ -62,6 +65,9 @@ class IngestRuntime():
         self.collections: list[Collection] = []
         self.components = ComponentRegistry()
         self._setup()
+        self.collection_location_matcher: FileLocationMatcher = SimpleFileLocationMatcher(
+            [c.base_location for c in self.collections]
+        )
 
     def make_component(self, config: ComponentConfigUnion, runtime: Optional[ComponentRuntime]=None):
         return self._COMPONENT_CLASS_MAP[config.type](config=config)
@@ -102,12 +108,22 @@ class IngestCapability:
     def __init__(self, runtime: IngestRuntime):
         self.runtime = runtime
 
-    def ingest_workspace(self, dry_run=True):
+    def ingest_workspace(self, dry_run=True) -> int:
+        count = 0
         for collection in self.runtime.collections:
-            collection.ingest(dry_run=dry_run)
+            count += collection.ingest(dry_run=dry_run)
+        return count
 
-    def ingest_file(self, dry_run=True):
-        raise NotImplementedError()
+    def ingest_file(self, file_location:FileLocation, dry_run=True) -> int:
+        count = 0
+        index = self.runtime.collection_location_matcher.find_match_index(file_location=file_location)
+        collection = self.runtime.collections[index]
+        if index is not None:
+            count += collection.ingest_file(file_location=file_location, dry_run=dry_run)
+        return count
 
-    def ingest_files(self, dry_run=True):
-        raise NotImplementedError()
+    def ingest_files(self, file_locations:list[FileLocation], dry_run=True) -> int:
+        count = 0
+        for file_location in file_locations:
+            count += self.ingest_file(file_location=file_location, dry_run=dry_run)
+        return count

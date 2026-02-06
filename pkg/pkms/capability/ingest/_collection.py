@@ -63,6 +63,8 @@ class Collection():
         self.name = config.name
         self.description = config.description
         self.base_path = config.base_path
+        path_convention= 'windows' if os.name == 'nt' else 'posix'
+        self.base_location = FileLocation.from_filesystem_path(self.base_path, path_convention=path_convention)
         self.components: CollectionComponents 
     
     def ingest(self, dry_run:bool|None=False) -> int:
