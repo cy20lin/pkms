@@ -7,7 +7,7 @@
 - odt to html pre-render
   - Write my own converter: take like 12 days
   - Why not use Other solution:
-    - license issue and cannot render drawing shapes o
+    - license issue and cannot render drawing shapes well
   - solutions
     - odt2html: 
     - pandoc:
@@ -29,6 +29,7 @@
       - 所見及所得 WYSIWYG : like milkdown
       - 及時預覽IR: like obsidian
       - 分屏預覽: like stackedit
+  - code-mirror6 + lezer
 
 - Database
   - Sqlite3
@@ -74,3 +75,6 @@
 
 - for file content indexing
   - https://github.com/VectifyAI/PageIndex
+
+- table webui
+  - https://github.com/olifolkerd/tabulator
