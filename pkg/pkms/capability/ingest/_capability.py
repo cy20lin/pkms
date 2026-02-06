@@ -131,8 +131,8 @@ class IngestCapability:
     def ingest_file(self, file_location:FileLocation, dry_run=True) -> int:
         count = 0
         index = self.runtime.collection_location_matcher.find_match_index(file_location=file_location)
-        collection = self.runtime.collections[index]
         if index is not None:
+            collection = self.runtime.collections[index]
             count += collection.ingest_file(file_location=file_location, dry_run=dry_run)
         return count
 
