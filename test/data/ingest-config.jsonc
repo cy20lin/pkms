@@ -1,5 +1,6 @@
 // The testing working directory is expected to be at 
-// "{PROJECT_ROOT}/test/tmp/ingest-collections"
+// "{PROJECT_ROOT}/test/tmp/ingest-<target>"
+// target = file | files | collection | collections | workspace
 {
     "name": "test-ingest-collections",
     "description": "a test config for ingest-collections",
@@ -56,7 +57,7 @@
         {
             "name": "html_test",
             "description": "",
-            "base_path":"{var.CURRENT_CONFIG_DIR}/collections/html",
+            "base_path":"{var.CURRENT_CONFIG_DIR}/../../data/collections/html",
             "components": {
                 "globber": "$globber",
                 "screener": "$screener",
@@ -69,7 +70,7 @@
         {
             "name": "odt_test",
             "description": "",
-            "base_path":"{var.CURRENT_CONFIG_DIR}/collections/odt",
+            "base_path":"{var.CURRENT_CONFIG_DIR}/../../data/collections/odt",
             "components": {
                 "globber": {
                     "type": "PathspecGlobberConfig",
@@ -87,7 +88,7 @@
         {
             "name": "markdown_test",
             "description": "",
-            "base_path":"{var.CURRENT_CONFIG_DIR}/collections/markdown",
+            "base_path":"{var.CURRENT_CONFIG_DIR}/../../data/collections/markdown",
             "components": {
                 "globber": {
                     "type": "PathspecGlobberConfig",
