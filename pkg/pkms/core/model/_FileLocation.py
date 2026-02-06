@@ -134,11 +134,13 @@ class FileLocation(BaseModel):
     @staticmethod
     def from_filesystem_path(
         path: str,
-        base_path: str | None = '',
+        base_path: str | None = None,
         *,
         scheme='file',
         authority='', 
-        path_convention: Literal["posix", "windows"]
+        path_convention: Literal["posix", "windows"],
+        absolute=False,
+        normalize=True,
     ) -> FileLocation:
         if path_convention is None:
             Path = pathlib.PurePath
@@ -148,6 +150,16 @@ class FileLocation(BaseModel):
             Path = pathlib.PurePosixPath
         else:
             raise ValueError(f'Unkonw path_convention={path_convention!r}')
+        
+        # NOTE: absolute/normalize the path for canonical segments
+        if absolute:
+            # NOTE: absolute implies normalize when using os.path.abspath
+            base_path = os.path.abspath(base_path) if base_path is not None else base_path
+            path = os.path.join(base_path, path) if base_path is not None else path
+            path = os.path.abspath(path)
+        elif normalize:
+            base_path = os.path.normpath(base_path) if base_path else base_path
+            path = os.path.normpath(path) if path else path
         
         base_path, sub_path = FileLocation._split_path(path, base_path, Path)
         
