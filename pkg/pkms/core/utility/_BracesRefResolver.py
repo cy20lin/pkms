@@ -18,10 +18,12 @@ class BracesRefResolver:
         self.dollar_braces_resolver = DollarBracesRefResolver()
         self.getter = SimpleNestItemGetter()
 
-    def resolve(self, target:Any, root:dict, getter:NestItemGetter) -> Any:
+    def resolve(self, target:Any, root:dict, getter:NestItemGetter|None = None) -> Any:
         return self.try_resolve(target, root, getter)[1]
 
-    def try_resolve(self, target:Any, root:dict, getter:NestItemGetter) -> Any:
+    def try_resolve(self, target:Any, root:dict, getter:NestItemGetter|None = None) -> Any:
+        if getter is None:
+            getter = self.getter
         is_resolved, result =self.dollar_braces_resolver.try_resolve(target, root, getter=getter)
         if is_resolved:
             pass

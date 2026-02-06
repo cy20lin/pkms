@@ -25,10 +25,12 @@ class DollarBracesRefResolver:
                     unescaped = target[1:]
         return unescaped, ref
 
-    def resolve(self, target:Any, root:dict, getter:NestItemGetter) -> Any:
+    def resolve(self, target:Any, root:dict, getter:NestItemGetter|None = None) -> Any:
         return self.try_resolve(target, root, getter)[1]
 
-    def try_resolve(self, target:Any, root:dict, getter: NestItemGetter) -> Any:
+    def try_resolve(self, target:Any, root:dict, getter: NestItemGetter|None = None) -> Any:
+        if getter is None:
+            getter = self.getter
         is_resolved = False
         result = target
         if isinstance(target, str):

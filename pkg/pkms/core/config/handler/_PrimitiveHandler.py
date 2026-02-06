@@ -4,7 +4,7 @@ from typing import Any
 
 class PrimitiveHandler(NodeHandler):
     def accepts(self, node: Any):
-        return True
+        return node is None or isinstance(node, (int,float))
 
     def is_leaf(self, node):
         return True

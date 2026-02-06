@@ -32,7 +32,7 @@ class Walker:
             frame = stack[-1]
 
             if frame.depth > self.max_depth:
-                raise ConfigResolutionError(f"Maximum depth {self.max_depth} exceeded at node {frame.value}")
+                raise ConfigResolutionError(f"Maximum depth {self.max_depth} exceeded at node {frame.node}")
 
             # leaf node
             if self.policy.is_leaf(frame.node):

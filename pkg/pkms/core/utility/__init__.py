@@ -18,6 +18,8 @@ from ._BracesRefResolver import (
 )
 from ._SimpleFileLocationMatcher import SimpleFileLocationMatcher
 from ._FileLocationMatcher import FileLocationMatcher
+from ._NestItemGetter import NestItemGetter
+from ._SimpleNestItemGetter import SimpleNestItemGetter
 
 def str_to_bool(s: str):
     if s.isupper():
