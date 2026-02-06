@@ -16,6 +16,8 @@ from ._DollarBracesRefResolver import (
 from ._BracesRefResolver import (
     BracesRefResolver
 )
+from ._SimpleFileLocationMatcher import SimpleFileLocationMatcher
+from ._FileLocationMatcher import FileLocationMatcher
 
 def str_to_bool(s: str):
     if s.isupper():
