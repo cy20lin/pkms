@@ -20,7 +20,7 @@ class SimpleFileLocationMatcher(FileLocationMatcher):
                 continue
             candidate_segments = candidate_file_location.segments
             target_segments = file_location.segments
-            if len(candidate_file_location) > len(target_segments):
+            if len(candidate_segments) > len(target_segments):
                 continue
 
             if target_segments[:len(candidate_segments)] == candidate_segments:
