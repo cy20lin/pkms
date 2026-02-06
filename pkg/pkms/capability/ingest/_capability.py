@@ -125,7 +125,7 @@ class IngestCapability:
     def ingest_collections(self, collection_locations:list[FileLocation], dry_run=True) -> int:
         count = 0
         for collection_location in collection_locations:
-            count += self.ingest_file(file_location=collection_location, dry_run=dry_run)
+            count += self.ingest_collection(collection_location=collection_location, dry_run=dry_run)
         return count
 
     def ingest_file(self, file_location:FileLocation, dry_run=True) -> int:
