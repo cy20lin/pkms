@@ -102,10 +102,12 @@ class IngestCapability:
     def __init__(self, runtime: IngestRuntime):
         self.runtime = runtime
 
-    def _ingest(self, dry_run):
+    def ingest_workspace(self, dry_run=True):
         for collection in self.runtime.collections:
             collection.ingest(dry_run=dry_run)
 
-    def run(self, dry_run=True):
-        self._ingest(dry_run=dry_run)
-        
+    def ingest_file(self, dry_run=True):
+        raise NotImplementedError()
+
+    def ingest_files(self, dry_run=True):
+        raise NotImplementedError()

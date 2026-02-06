@@ -24,7 +24,7 @@ def main(argv):
             config_json = json.load(f)
         config = IngestConfig(**config_json)
         app = IngestCapability(config=config)
-        app.run(dry_run=args.dry_run)
+        app.ingest_workspace(dry_run=args.dry_run)
     except Exception as e:
         for s in traceback.format_exception(e):
             logging.critical(s)
