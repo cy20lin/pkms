@@ -16,7 +16,7 @@ def parse_args(argv:list[str]=None):
         "pkms.cli.ingest.file",
         description="Ingest specified collection of owned file resources"
     )
-    parser.add_argument("file", help='Path to workspace dir')
+    parser.add_argument("file", help='Path to file to ingest')
     parser.add_argument("--workspace-dir", help='Path to workspace dir', default=None)
     parser.add_argument("--config-path", help='Path to workspace config', default=None)
     parser.add_argument('--dry-run', help='Just print instead of renaming the files',default=None, const=True, nargs='?', type=str_to_bool)

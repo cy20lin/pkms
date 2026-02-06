@@ -12,9 +12,9 @@ def main(argv: list[str] | None = None) -> int:
         description="PKMS Ingestion utility"
     )
     parser.add_command("file", file.main, "Ingest a file")
-    parser.add_command("files", file.main, "Ingest files")
-    parser.add_command("collection", file.main, "Ingest a collection")
-    parser.add_command("collections", file.main, "Ingest collections")
+    parser.add_command("files", files.main, "Ingest files")
+    parser.add_command("collection", collection.main, "Ingest a collection")
+    parser.add_command("collections", collections.main, "Ingest collections")
     parser.add_command("workspace", workspace.main, "Ingest a workspace")
     parsed_args = parser.parse(args)
     command = parser.get_command(parsed_args.command)
