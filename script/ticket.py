@@ -6,6 +6,8 @@ import os
 from datetime import datetime, timezone
 import pathlib
 import time
+import re
+import json
 
 DEFAULT_REMOTE = "origin"
 DEFAULT_BRANCH = "beads-sync"
@@ -158,10 +160,45 @@ def do_status(remote, branch, worktree):
 
 # ---------- operations ----------
 
+def get_beads_version() -> str | None:
+    result = run(["bd", "version"], capture=True)
+    version_parts = result.stdout.strip().split(sep=' ')
+    version = next(filter(lambda part: re.match("^[0-9]+(\.[0-9]+)+", part.strip()), version_parts), None)
+    return version
+
+def get_worktree_head_commit_id(worktree) -> str | None:
+    commit = None
+    command_result = run(["git", "rev-parse", "HEAD"], cwd=worktree, allow_fail=True, capture=True)
+    if command_result.returncode == 0:
+        commit = command_result.stdout.strip()
+    return commit
+
+def get_current_datetime() -> str:
+    return datetime.now(timezone.utc).astimezone().isoformat()
+    
 def do_pull(remote, branch, worktree):
     print("=== pull: remote → db ===")
+    # copy current file as left file
+    issues_jsonl_relative_path = '.beads/issues.jsonl'
+    left_jsonl_relative_path = '.beads/beads.left.jsonl'
+    left_meta_json_relative_path = '.beads/beads.left.meta.json'
+    issues_jsonl_path = pathlib.Path(worktree) / issues_jsonl_relative_path
+    left_jsonl_path = pathlib.Path(worktree) / left_jsonl_relative_path
+    left_meta_json_path = pathlib.Path(worktree) / left_meta_json_relative_path
+    if issues_jsonl_path.exists():
+        os.replace(issues_jsonl_path, left_jsonl_path)
+    # checkout HEAD issues.jsonl
+    run(['git', 'checkout', '--', issues_jsonl_relative_path], cwd=worktree, allow_fail=True)
+    # save metadata
+    metadata = {
+        'version': get_beads_version(),
+        'timestamp': get_current_datetime(),
+        'commit': get_worktree_head_commit_id(worktree=worktree)
+    }
+    with open(left_meta_json_path, "w", newline='\n') as json_file:
+        json.dump(metadata, json_file)
     run(["git", "pull", "--rebase", remote, branch], cwd=worktree)
-    run(["bd", "sync", "--import-only"])
+    run(["bd", "import", "-i", issues_jsonl_relative_path, "--protect-left-snapshot"], cwd=worktree)
     ok("pull completed")
 
 
